@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,23 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import type { SessionSettings, Gender, AvatarStyle, AudienceLevel, Duration, BackgroundPreset } from "@/lib/types";
 import {
-  VOICES,
-  HOST_PERSONALITIES,
-  GUEST_PERSONAS,
-  AVATARS,
-  BACKGROUND_PRESETS,
-  DURATION_OPTIONS,
+  VOICES, HOST_PERSONALITIES, GUEST_PERSONAS, AVATARS, BACKGROUND_PRESETS, DURATION_OPTIONS, RAJ_HOST,
 } from "@/lib/constants";
-import { Link } from "react-router-dom";
 import StudioPreview from "@/components/StudioPreview";
+import AvatarSVG from "@/components/AvatarSVG";
 
 const Setup = () => {
   const navigate = useNavigate();
@@ -32,39 +23,22 @@ const Setup = () => {
   const [duration, setDuration] = useState<Duration>("5");
   const [energy, setEnergy] = useState(50);
   const [audienceLevel, setAudienceLevel] = useState<AudienceLevel>("intermediate");
-  const [hostPersonality, setHostPersonality] = useState(HOST_PERSONALITIES[0].id);
+  const [hostPersonality, setHostPersonality] = useState(RAJ_HOST.personality);
   const [guestPersona, setGuestPersona] = useState(GUEST_PERSONAS[0].id);
-  const [hostGender, setHostGender] = useState<Gender>("male");
   const [guestGender, setGuestGender] = useState<Gender>("female");
-  const [hostVoiceId, setHostVoiceId] = useState("");
   const [guestVoiceId, setGuestVoiceId] = useState("");
-  const [hostAvatarStyle, setHostAvatarStyle] = useState<AvatarStyle>("realistic");
-  const [hostAvatar, setHostAvatar] = useState("");
   const [guestAvatarStyle, setGuestAvatarStyle] = useState<AvatarStyle>("3d");
   const [guestAvatar, setGuestAvatar] = useState("");
   const [background, setBackground] = useState<BackgroundPreset>("studio");
 
-  const hostVoices = useMemo(() => VOICES.filter((v) => v.gender === hostGender), [hostGender]);
   const guestVoices = useMemo(() => VOICES.filter((v) => v.gender === guestGender), [guestGender]);
-  const hostAvatars = useMemo(() => AVATARS.filter((a) => a.style === hostAvatarStyle), [hostAvatarStyle]);
   const guestAvatars = useMemo(() => AVATARS.filter((a) => a.style === guestAvatarStyle), [guestAvatarStyle]);
 
-  // Default voice selection
-  useMemo(() => {
-    if (!hostVoiceId || !hostVoices.find((v) => v.id === hostVoiceId)) {
-      setHostVoiceId(hostVoices[0]?.id ?? "");
-    }
-  }, [hostVoices]);
   useMemo(() => {
     if (!guestVoiceId || !guestVoices.find((v) => v.id === guestVoiceId)) {
       setGuestVoiceId(guestVoices[0]?.id ?? "");
     }
   }, [guestVoices]);
-  useMemo(() => {
-    if (!hostAvatar || !hostAvatars.find((a) => a.id === hostAvatar)) {
-      setHostAvatar(hostAvatars[0]?.id ?? "");
-    }
-  }, [hostAvatars]);
   useMemo(() => {
     if (!guestAvatar || !guestAvatars.find((a) => a.id === guestAvatar)) {
       setGuestAvatar(guestAvatars[0]?.id ?? "");
@@ -80,11 +54,11 @@ const Setup = () => {
       audienceLevel,
       hostPersonality,
       guestPersona,
-      hostGender,
+      hostGender: RAJ_HOST.gender,
       guestGender,
-      hostVoiceId,
+      hostVoiceId: RAJ_HOST.voiceId,
       guestVoiceId,
-      hostAvatar,
+      hostAvatar: RAJ_HOST.avatarId,
       guestAvatar,
       background,
     };
@@ -106,11 +80,17 @@ const Setup = () => {
           <h1 className="text-2xl font-bold">Session Setup</h1>
         </div>
 
-        <motion.div
-          className="flex flex-col gap-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div className="flex flex-col gap-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          {/* Host card (fixed) */}
+          <div className="flex items-center gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <AvatarSVG variant={RAJ_HOST.avatarVariant} size={64} colors={RAJ_HOST.colors} />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Your Host</p>
+              <p className="text-lg font-bold text-foreground">{RAJ_HOST.name}</p>
+              <p className="text-sm text-muted-foreground">{RAJ_HOST.tagline}</p>
+            </div>
+          </div>
+
           {/* Topic */}
           <div className="space-y-2">
             <Label htmlFor="topic" className="text-base font-medium">Topic *</Label>
@@ -165,7 +145,7 @@ const Setup = () => {
           {/* Personalities */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-3">
-              <SectionTitle>Host Personality</SectionTitle>
+              <SectionTitle>Raj's Style</SectionTitle>
               <Select value={hostPersonality} onValueChange={setHostPersonality}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -188,125 +168,65 @@ const Setup = () => {
             </div>
           </div>
 
-          {/* Gender & Voice */}
-          <div className="grid gap-6 sm:grid-cols-2">
-            {/* Host */}
-            <div className="space-y-4 rounded-xl border border-border bg-card/40 p-4">
-              <SectionTitle>Host</SectionTitle>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Gender</Label>
-                <div className="flex gap-2">
-                  {(["male", "female"] as const).map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => setHostGender(g)}
-                      className={`flex-1 rounded-lg border px-3 py-1.5 text-sm capitalize transition-all ${
-                        hostGender === g ? "border-primary bg-primary/10 text-primary" : "border-border"
-                      }`}
-                    >
-                      {g}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Voice</Label>
-                <Select value={hostVoiceId} onValueChange={setHostVoiceId}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {hostVoices.map((v) => <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Avatar Style</Label>
-                <div className="flex gap-2">
-                  {(["realistic", "3d", "minimal"] as const).map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setHostAvatarStyle(s)}
-                      className={`flex-1 rounded-lg border px-2 py-1.5 text-xs capitalize transition-all ${
-                        hostAvatarStyle === s ? "border-primary bg-primary/10 text-primary" : "border-border"
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {hostAvatars.map((a) => (
-                    <button
-                      key={a.id}
-                      onClick={() => setHostAvatar(a.id)}
-                      className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all ${
-                        hostAvatar === a.id ? "border-primary scale-110" : "border-transparent"
-                      }`}
-                      style={{ background: a.colors.bg }}
-                    >
-                      <span className="text-xs font-bold text-white">{a.label[0]}</span>
-                    </button>
-                  ))}
-                </div>
+          {/* Guest Customization */}
+          <div className="space-y-4 rounded-xl border border-border bg-card/40 p-4">
+            <SectionTitle>Guest Speaker</SectionTitle>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Gender</Label>
+              <div className="flex gap-2">
+                {(["male", "female"] as const).map((g) => (
+                  <button
+                    key={g}
+                    onClick={() => setGuestGender(g)}
+                    className={`flex-1 rounded-lg border px-3 py-1.5 text-sm capitalize transition-all ${
+                      guestGender === g ? "border-primary bg-primary/10 text-primary" : "border-border"
+                    }`}
+                  >
+                    {g}
+                  </button>
+                ))}
               </div>
             </div>
-
-            {/* Guest */}
-            <div className="space-y-4 rounded-xl border border-border bg-card/40 p-4">
-              <SectionTitle>Guest</SectionTitle>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Gender</Label>
-                <div className="flex gap-2">
-                  {(["male", "female"] as const).map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => setGuestGender(g)}
-                      className={`flex-1 rounded-lg border px-3 py-1.5 text-sm capitalize transition-all ${
-                        guestGender === g ? "border-primary bg-primary/10 text-primary" : "border-border"
-                      }`}
-                    >
-                      {g}
-                    </button>
-                  ))}
-                </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Voice</Label>
+              <Select value={guestVoiceId} onValueChange={setGuestVoiceId}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {guestVoices.map((v) => <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Avatar Style</Label>
+              <div className="flex gap-2">
+                {(["realistic", "3d", "minimal"] as const).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setGuestAvatarStyle(s)}
+                    className={`flex-1 rounded-lg border px-2 py-1.5 text-xs capitalize transition-all ${
+                      guestAvatarStyle === s ? "border-primary bg-primary/10 text-primary" : "border-border"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Voice</Label>
-                <Select value={guestVoiceId} onValueChange={setGuestVoiceId}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {guestVoices.map((v) => <SelectItem key={v.id} value={v.id}>{v.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Avatar Style</Label>
-                <div className="flex gap-2">
-                  {(["realistic", "3d", "minimal"] as const).map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setGuestAvatarStyle(s)}
-                      className={`flex-1 rounded-lg border px-2 py-1.5 text-xs capitalize transition-all ${
-                        guestAvatarStyle === s ? "border-primary bg-primary/10 text-primary" : "border-border"
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {guestAvatars.map((a) => (
+              <div className="flex flex-wrap gap-2">
+                {guestAvatars.map((a) => {
+                  const idx = parseInt(a.id.split("-").pop() || "0", 10);
+                  return (
                     <button
                       key={a.id}
                       onClick={() => setGuestAvatar(a.id)}
-                      className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all ${
+                      className={`flex h-14 w-14 items-center justify-center rounded-full border-2 transition-all ${
                         guestAvatar === a.id ? "border-primary scale-110" : "border-transparent"
                       }`}
-                      style={{ background: a.colors.bg }}
+                      style={{ background: a.colors.bg + "33" }}
                     >
-                      <span className="text-xs font-bold text-white">{a.label[0]}</span>
+                      <AvatarSVG variant={idx} size={40} colors={a.colors} />
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -324,17 +244,17 @@ const Setup = () => {
                   }`}
                   style={{ background: bg.gradient }}
                 >
-                  <span className="text-xs font-medium text-white/80">{bg.label}</span>
+                  <span className="text-xs font-medium text-foreground/80">{bg.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Studio Preview */}
-          {hostAvatar && guestAvatar && (
+          {guestAvatar && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground text-center">Studio Preview</h3>
-              <StudioPreview hostAvatarId={hostAvatar} guestAvatarId={guestAvatar} backgroundId={background} />
+              <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-muted-foreground">Studio Preview</h3>
+              <StudioPreview hostAvatarId={RAJ_HOST.avatarId} guestAvatarId={guestAvatar} backgroundId={background} />
             </div>
           )}
 

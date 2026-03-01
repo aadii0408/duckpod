@@ -1,7 +1,20 @@
 import type { VoiceOption, HostPersonality, GuestPersona, AvatarOption, AvatarStyle } from "./types";
 
+// ═══════════════════════════════════════════════════════
+// RAJ — Fixed Host Identity
+// ═══════════════════════════════════════════════════════
+export const RAJ_HOST = {
+  name: "Raj",
+  avatarVariant: 0, // Alex character (headphones)
+  avatarId: "realistic-0",
+  voiceId: "CwhRBWXzGAHq8TQ4Fs17", // Roger — male
+  gender: "male" as const,
+  personality: "mistral-crisp",
+  colors: { bg: "hsl(168, 80%, 50%)", skin: "hsl(30, 60%, 70%)", accent: "hsl(270, 60%, 60%)" },
+  tagline: "Sharp, witty, and always curious",
+};
+
 export const VOICES: VoiceOption[] = [
-  // Male voices
   { id: "CwhRBWXzGAHq8TQ4Fs17", name: "Roger", gender: "male" },
   { id: "IKne3meq5aSn9XLyUdCD", name: "Charlie", gender: "male" },
   { id: "JBFqnCBsd6RMkjVDRZzb", name: "George", gender: "male" },
@@ -13,7 +26,6 @@ export const VOICES: VoiceOption[] = [
   { id: "onwK4e9ZLuTAKqWW03F9", name: "Daniel", gender: "male" },
   { id: "pqHfZKP75CvOlQylNhV4", name: "Bill", gender: "male" },
   { id: "bIHbv24MWmeRgasZH58o", name: "Will", gender: "male" },
-  // Female voices
   { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", gender: "female" },
   { id: "FGY2WhTYpPnrIDTdsKH5", name: "Laura", gender: "female" },
   { id: "SAz9YHcvj6GT2YYXdXww", name: "River", gender: "female" },
@@ -28,25 +40,25 @@ export const HOST_PERSONALITIES: HostPersonality[] = [
     id: "mistral-crisp",
     label: "Mistral Crisp",
     description: "Short, witty, confident",
-    systemPromptHint: "You are a sharp, witty podcast host. Keep your sentences short and punchy. Be confident and slightly provocative. Use clever wordplay.",
+    systemPromptHint: "You are Raj, a sharp, witty podcast host. Keep your sentences short and punchy. Be confident and slightly provocative. Use clever wordplay.",
   },
   {
     id: "professor",
     label: "Professor",
     description: "Structured, calm, examples",
-    systemPromptHint: "You are a thoughtful, academic podcast host. Structure your questions clearly. Use analogies and examples. Maintain a calm, measured pace.",
+    systemPromptHint: "You are Raj, a thoughtful, academic podcast host. Structure your questions clearly. Use analogies and examples. Maintain a calm, measured pace.",
   },
   {
     id: "founder-mode",
     label: "Founder Mode",
     description: "Punchy, product framing",
-    systemPromptHint: "You are an energetic startup podcast host. Frame everything through product/business lenses. Be direct, action-oriented, and talk about impact and scale.",
+    systemPromptHint: "You are Raj, an energetic startup podcast host. Frame everything through product/business lenses. Be direct, action-oriented, and talk about impact and scale.",
   },
   {
     id: "late-night-chill",
     label: "Late-night Chill",
     description: "Relaxed, soothing",
-    systemPromptHint: "You are a late-night podcast host with a relaxed, warm tone. Take your time, use casual language, and create a cozy conversational atmosphere.",
+    systemPromptHint: "You are Raj, a late-night podcast host with a relaxed, warm tone. Take your time, use casual language, and create a cozy conversational atmosphere.",
   },
 ];
 
