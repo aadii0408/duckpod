@@ -22,6 +22,7 @@ const LiveRoom = () => {
   const [amplitude, setAmplitude] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [countdown, setCountdown] = useState<number | null>(3);
   const sessionEndedRef = useRef(false);
   const isPausedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
@@ -56,7 +57,7 @@ const LiveRoom = () => {
     }
   }, [timeElapsed, settings]);
 
-  // Initialize session
+  // Countdown + Initialize session
   useEffect(() => {
     if (!settings) return;
     memoryRef.current = {
@@ -67,7 +68,20 @@ const LiveRoom = () => {
       timeRemainingSeconds: settings.duration === "unlimited" ? 9999 : parseInt(settings.duration) * 60,
       turnCount: 0,
     };
-    runTurn("HOST");
+    // 3-2-1 countdown
+    let c = 3;
+    setCountdown(c);
+    const iv = setInterval(() => {
+      c--;
+      if (c <= 0) {
+        clearInterval(iv);
+        setCountdown(null);
+        runTurn("HOST");
+      } else {
+        setCountdown(c);
+      }
+    }, 1000);
+    return () => clearInterval(iv);
   }, [settings]);
 
   const formatTime = (seconds: number) => {
@@ -329,6 +343,25 @@ const LiveRoom = () => {
 
   const bgPreset = BACKGROUND_PRESETS.find((b) => b.id === settings.background);
   const bgStyle = bgPreset ? bgPreset.gradient : undefined;
+
+  // Countdown overlay
+  if (countdown !== null) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center" style={{ background: bgStyle }}>
+        <motion.div
+          key={countdown}
+          className="text-8xl font-bold text-primary"
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 1.5, opacity: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          {countdown}
+        </motion.div>
+        <p className="mt-4 text-sm uppercase tracking-widest text-muted-foreground">Going live…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen flex-col" style={{ background: bgStyle }}>
