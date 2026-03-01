@@ -41,7 +41,7 @@ const SessionEnd = () => {
 
   if (!state) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">No session data found.</p>
         <Button asChild><Link to="/">Go Home</Link></Button>
       </div>
@@ -82,42 +82,42 @@ const SessionEnd = () => {
   const gAv = AVATARS.find((a) => a.id === settings.guestAvatar);
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="mx-auto max-w-3xl">
+    <div className="section-padding py-6 sm:py-10">
+      <div className="mx-auto max-w-2xl">
         <motion.div className="flex flex-col items-center gap-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          {/* Header */}
           <div className="flex flex-col items-center gap-3 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <CheckCircle className="h-8 w-8 text-primary" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+              <CheckCircle className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold">{showNotes?.title || "Session Complete!"}</h1>
-            <p className="text-muted-foreground">{settings.topic}</p>
+            <h1 className="text-xl font-bold sm:text-2xl">{showNotes?.title || "Session Complete!"}</h1>
+            <p className="text-sm text-muted-foreground">{settings.topic}</p>
           </div>
 
-          <div className="flex gap-6">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />{minutes} min
+          <div className="flex gap-5">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Clock className="h-3.5 w-3.5" />{minutes} min
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Hash className="h-4 w-4" />{transcript.length} turns
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Hash className="h-3.5 w-3.5" />{transcript.length} turns
             </div>
           </div>
 
-          {/* Anti-AI Reflection Form */}
+          {/* Reflection form */}
           {!formSubmitted ? (
             <motion.div
-              className="w-full space-y-6 rounded-2xl border-2 border-primary/30 bg-card/60 p-6 backdrop-blur-sm"
+              className="w-full space-y-5 rounded-2xl glass border-primary/20 p-5 sm:p-6"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
             >
               <div className="space-y-1 text-center">
                 <h2 className="text-lg font-bold text-foreground">🎙️ Post-Podcast Reflection</h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Help us understand how DuckPod supports human-first content creation.
                 </p>
               </div>
 
-              {/* Q1 */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">
                   1. Did you feel in control of the conversation direction?
@@ -136,7 +136,6 @@ const SessionEnd = () => {
                 </RadioGroup>
               </div>
 
-              {/* Q2 */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">
                   2. How would you describe AI's role in this podcast?
@@ -155,7 +154,6 @@ const SessionEnd = () => {
                 </RadioGroup>
               </div>
 
-              {/* Q3 */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">
                   3. What made this experience feel human-driven despite using AI?
@@ -175,7 +173,7 @@ const SessionEnd = () => {
             </motion.div>
           ) : (
             <motion.div
-              className="w-full space-y-4 rounded-2xl border border-primary/30 bg-primary/5 p-6"
+              className="w-full space-y-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 sm:p-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -196,16 +194,13 @@ const SessionEnd = () => {
             </motion.div>
           )}
 
-          {/* Trust Score Rubric — appears after reflection submitted */}
-          {formSubmitted && (
-            <TrustScoreRubric />
-          )}
+          {formSubmitted && <TrustScoreRubric />}
 
           {/* Show notes */}
           {showNotes && (
-            <div className="w-full space-y-4 rounded-xl border border-border bg-card/40 p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Show Notes</h3>
-              {showNotes.summary && <p className="text-sm text-foreground/85">{showNotes.summary}</p>}
+            <div className="w-full space-y-4 rounded-xl glass p-5">
+              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">Show Notes</h3>
+              {showNotes.summary && <p className="text-sm leading-relaxed text-foreground/85">{showNotes.summary}</p>}
               {showNotes.takeaways?.length > 0 && (
                 <div>
                   <h4 className="mb-2 text-xs font-semibold text-muted-foreground">Key Takeaways</h4>
@@ -221,7 +216,7 @@ const SessionEnd = () => {
               {showNotes.hashtags?.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {showNotes.hashtags.map((h, i) => (
-                    <span key={i} className="rounded-full bg-secondary/50 px-2 py-0.5 text-xs text-secondary-foreground">{h}</span>
+                    <span key={i} className="rounded-full bg-secondary/50 px-2.5 py-0.5 text-xs text-secondary-foreground">{h}</span>
                   ))}
                 </div>
               )}
@@ -229,12 +224,12 @@ const SessionEnd = () => {
           )}
 
           {/* Transcript */}
-          <div className="w-full rounded-xl border border-border bg-card/40">
+          <div className="w-full overflow-hidden rounded-xl border border-border/50 bg-card/30">
             <TranscriptPanel messages={transcript} className="max-h-80" />
           </div>
 
-          {/* Export actions */}
-          <div className="flex gap-3">
+          {/* Export */}
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={copyTranscript} className="gap-1.5">
               <Copy className="h-3.5 w-3.5" />
               Copy Transcript
@@ -245,23 +240,23 @@ const SessionEnd = () => {
             </Button>
           </div>
 
-          {/* Shareable Episode Card */}
-          <div className="w-full overflow-hidden rounded-2xl border border-border" style={{
+          {/* Shareable card */}
+          <div className="w-full overflow-hidden rounded-2xl border border-border/50" style={{
             background: BACKGROUND_PRESETS.find((b) => b.id === settings.background)?.gradient ?? "hsl(225, 25%, 8%)",
           }}>
-            <div className="flex flex-col items-center gap-4 p-8">
+            <div className="flex flex-col items-center gap-4 p-6 sm:p-8">
               <div className="flex items-center gap-2">
                 <Radio className="h-4 w-4 text-primary" />
                 <span className="text-sm font-bold text-primary">DuckPod</span>
               </div>
-              <h3 className="text-lg font-bold text-foreground">{showNotes?.title || settings.topic}</h3>
+              <h3 className="text-center text-base font-bold text-foreground sm:text-lg">{showNotes?.title || settings.topic}</h3>
               <div className="flex items-center gap-6">
                 <div className="flex flex-col items-center gap-1">
-                  <AvatarSVG variant={RAJ_HOST.avatarVariant} size={64} colors={RAJ_HOST.colors} />
+                  <AvatarSVG variant={RAJ_HOST.avatarVariant} size={56} colors={RAJ_HOST.colors} />
                   <span className="text-[10px] font-semibold text-muted-foreground">{RAJ_HOST.name}</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <AvatarSVG variant={gIdx} size={64} colors={gAv?.colors ?? { bg: "hsl(270,60%,55%)", skin: "hsl(25,55%,65%)", accent: "hsl(168,80%,50%)" }} />
+                  <AvatarSVG variant={gIdx} size={56} colors={gAv?.colors ?? { bg: "hsl(270,60%,55%)", skin: "hsl(25,55%,65%)", accent: "hsl(168,80%,50%)" }} />
                   <span className="text-[10px] font-semibold text-muted-foreground">{gAv?.label ?? "Guest"}</span>
                 </div>
               </div>
@@ -274,7 +269,7 @@ const SessionEnd = () => {
           </div>
 
           {/* Navigation */}
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2">
             <Button asChild><Link to="/setup">New Session</Link></Button>
             <Button variant="outline" asChild><Link to="/episodes"><Library className="mr-1.5 h-4 w-4" />Episodes</Link></Button>
             <Button variant="ghost" asChild><Link to="/"><Home className="mr-1.5 h-4 w-4" />Home</Link></Button>

@@ -37,7 +37,6 @@ const LiveRoom = () => {
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
 
-  // Pause/resume audio when isPaused changes
   useEffect(() => {
     const audio = currentAudioRef.current;
     if (!audio) return;
@@ -52,14 +51,12 @@ const LiveRoom = () => {
     if (!settings) navigate("/setup");
   }, [settings, navigate]);
 
-  // Timer
   useEffect(() => {
     if (isPaused || sessionEndedRef.current || countdown !== null) return;
     timerRef.current = setInterval(() => setTimeElapsed((t) => t + 1), 1000);
     return () => clearInterval(timerRef.current);
   }, [isPaused, countdown]);
 
-  // Duration limit check
   useEffect(() => {
     if (!settings || settings.duration === "unlimited") return;
     const limit = parseInt(settings.duration) * 60;
@@ -68,7 +65,6 @@ const LiveRoom = () => {
     }
   }, [timeElapsed, settings]);
 
-  // Countdown + start
   useEffect(() => {
     if (!settings) return;
     memoryRef.current = {
@@ -211,7 +207,6 @@ const LiveRoom = () => {
       const audio = new Audio(audioUrl);
       currentAudioRef.current = audio;
 
-      // If already paused, don't auto-play yet
       if (isPausedRef.current) {
         await new Promise<void>((resolve) => {
           const checkResume = setInterval(() => {
@@ -349,7 +344,6 @@ const LiveRoom = () => {
   const bgPreset = BACKGROUND_PRESETS.find((b) => b.id === settings.background);
   const bgStyle = bgPreset ? bgPreset.gradient : undefined;
 
-  // Countdown overlay
   if (countdown !== null) {
     return (
       <div className="flex h-screen flex-col items-center justify-center" style={{ background: bgStyle }}>
@@ -371,13 +365,13 @@ const LiveRoom = () => {
   return (
     <div className="flex h-screen flex-col" style={{ background: bgStyle }}>
       {/* Top bar */}
-      <div className="flex items-center justify-between border-b border-border/30 bg-background/60 px-6 py-3 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <div className="flex h-2 w-2 rounded-full bg-destructive animate-pulse" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-destructive">LIVE</span>
-          <h2 className="max-w-md truncate text-sm font-semibold text-foreground">{settings.topic}</h2>
+      <div className="flex items-center justify-between border-b border-border/30 glass px-3 py-2.5 sm:px-6 sm:py-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex h-2 w-2 shrink-0 rounded-full bg-destructive animate-pulse" />
+          <span className="hidden text-xs font-semibold uppercase tracking-wider text-destructive sm:inline">LIVE</span>
+          <h2 className="min-w-0 truncate text-xs font-semibold text-foreground sm:text-sm">{settings.topic}</h2>
           {isGenerating && (
-            <span className="animate-pulse rounded-full bg-primary/20 px-2 py-0.5 text-[10px] text-primary">
+            <span className="hidden animate-pulse rounded-full bg-primary/20 px-2 py-0.5 text-[10px] text-primary sm:inline">
               Generating…
             </span>
           )}
@@ -387,19 +381,20 @@ const LiveRoom = () => {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-lg font-bold text-foreground">{getDurationDisplay()}</span>
-          <Button variant="destructive" size="sm" onClick={handleEndSession} className="gap-1.5">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <span className="font-mono text-sm font-bold text-foreground sm:text-lg">{getDurationDisplay()}</span>
+          <Button variant="destructive" size="sm" onClick={handleEndSession} className="gap-1.5 text-xs sm:text-sm">
             <Square className="h-3 w-3" />
-            End Session
+            <span className="hidden sm:inline">End Session</span>
+            <span className="sm:hidden">End</span>
           </Button>
         </div>
       </div>
 
-      {/* Main layout: Host | Transcript | Guest */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Host (left) */}
-        <div className="flex w-1/4 min-w-[200px] flex-col items-center justify-center px-4">
+      {/* Main layout — stacks on mobile */}
+      <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+        {/* Host */}
+        <div className="flex shrink-0 items-center justify-center p-3 sm:p-4 lg:w-1/4 lg:min-w-[200px]">
           <AvatarCard
             speaker="HOST"
             label={RAJ_HOST.name}
@@ -410,13 +405,12 @@ const LiveRoom = () => {
         </div>
 
         {/* Center: Transcript + Controls */}
-        <div className="flex flex-1 flex-col border-x border-border/20">
-          <div className="flex-1 overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col border-y border-border/20 lg:border-x lg:border-y-0">
+          <div className="min-h-0 flex-1 overflow-hidden">
             <TranscriptPanel messages={transcript} className="h-full" />
           </div>
 
-          {/* Controls */}
-          <div className="border-t border-border/20 px-4 pb-3 pt-2">
+          <div className="border-t border-border/20 px-3 pb-2 pt-2 sm:px-4 sm:pb-3">
             <LiveControls
               isPaused={isPaused}
               onTogglePause={handleTogglePause}
@@ -435,8 +429,8 @@ const LiveRoom = () => {
           </div>
         </div>
 
-        {/* Guest (right) */}
-        <div className="flex w-1/4 min-w-[200px] flex-col items-center justify-center px-4">
+        {/* Guest */}
+        <div className="flex shrink-0 items-center justify-center p-3 sm:p-4 lg:w-1/4 lg:min-w-[200px]">
           <AvatarCard
             speaker="GUEST"
             label={AVATARS.find((a) => a.id === settings.guestAvatar)?.label ?? "Guest"}

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Radio } from "lucide-react";
+import { Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,34 +66,32 @@ const Setup = () => {
   };
 
   const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{children}</h3>
+    <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">{children}</h3>
   );
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      <div className="mx-auto max-w-3xl">
-        {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/"><ArrowLeft className="h-4 w-4" /></Link>
-          </Button>
-          <h1 className="text-2xl font-bold">Session Setup</h1>
-        </div>
+    <div className="section-padding py-6 sm:py-10">
+      <div className="mx-auto max-w-2xl">
+        <motion.div className="flex flex-col gap-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          {/* Header */}
+          <div>
+            <h1 className="text-2xl font-bold sm:text-3xl">Session Setup</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Configure your podcast session</p>
+          </div>
 
-        <motion.div className="flex flex-col gap-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          {/* Host card (fixed) */}
-          <div className="flex items-center gap-4 rounded-xl border border-primary/30 bg-primary/5 p-4">
-            <AvatarSVG variant={RAJ_HOST.avatarVariant} size={64} colors={RAJ_HOST.colors} />
+          {/* Host card */}
+          <div className="flex items-center gap-4 rounded-xl border border-primary/20 bg-primary/5 p-4">
+            <AvatarSVG variant={RAJ_HOST.avatarVariant} size={56} colors={RAJ_HOST.colors} />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Your Host</p>
-              <p className="text-lg font-bold text-foreground">{RAJ_HOST.name}</p>
-              <p className="text-sm text-muted-foreground">{RAJ_HOST.tagline}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Your Host</p>
+              <p className="text-base font-bold text-foreground">{RAJ_HOST.name}</p>
+              <p className="text-xs text-muted-foreground">{RAJ_HOST.tagline}</p>
             </div>
           </div>
 
           {/* Topic */}
           <div className="space-y-2">
-            <Label htmlFor="topic" className="text-base font-medium">Topic *</Label>
+            <Label htmlFor="topic" className="text-sm font-medium">Topic *</Label>
             <Input
               id="topic"
               placeholder="e.g. The future of AI agents in software development"
@@ -104,7 +102,7 @@ const Setup = () => {
           </div>
 
           {/* Duration & Energy */}
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-3">
               <SectionTitle>Duration</SectionTitle>
               <div className="flex flex-wrap gap-2">
@@ -112,10 +110,10 @@ const Setup = () => {
                   <button
                     key={opt.value}
                     onClick={() => setDuration(opt.value as Duration)}
-                    className={`rounded-lg border px-4 py-2 text-sm transition-all ${
+                    className={`rounded-lg border px-3.5 py-2 text-sm transition-all ${
                       duration === opt.value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-secondary/30 text-secondary-foreground hover:border-primary/40"
+                        ? "border-primary bg-primary/10 text-primary font-medium"
+                        : "border-border bg-secondary/30 text-secondary-foreground hover:border-primary/30"
                     }`}
                   >
                     {opt.label}
@@ -132,18 +130,18 @@ const Setup = () => {
           {/* Audience Level */}
           <div className="space-y-3">
             <SectionTitle>Audience Level</SectionTitle>
-            <RadioGroup value={audienceLevel} onValueChange={(v) => setAudienceLevel(v as AudienceLevel)} className="flex gap-4">
+            <RadioGroup value={audienceLevel} onValueChange={(v) => setAudienceLevel(v as AudienceLevel)} className="flex flex-wrap gap-4">
               {(["beginner", "intermediate", "expert"] as const).map((level) => (
                 <div key={level} className="flex items-center gap-2">
                   <RadioGroupItem value={level} id={level} />
-                  <Label htmlFor={level} className="capitalize">{level}</Label>
+                  <Label htmlFor={level} className="capitalize text-sm">{level}</Label>
                 </div>
               ))}
             </RadioGroup>
           </div>
 
           {/* Personalities */}
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-3">
               <SectionTitle>Raj's Style</SectionTitle>
               <Select value={hostPersonality} onValueChange={setHostPersonality}>
@@ -169,7 +167,7 @@ const Setup = () => {
           </div>
 
           {/* Guest Customization */}
-          <div className="space-y-4 rounded-xl border border-border bg-card/40 p-4">
+          <div className="space-y-4 rounded-xl glass p-4 sm:p-5">
             <SectionTitle>Guest Speaker</SectionTitle>
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Gender</Label>
@@ -178,8 +176,8 @@ const Setup = () => {
                   <button
                     key={g}
                     onClick={() => setGuestGender(g)}
-                    className={`flex-1 rounded-lg border px-3 py-1.5 text-sm capitalize transition-all ${
-                      guestGender === g ? "border-primary bg-primary/10 text-primary" : "border-border"
+                    className={`flex-1 rounded-lg border px-3 py-2 text-sm capitalize transition-all ${
+                      guestGender === g ? "border-primary bg-primary/10 text-primary font-medium" : "border-border text-muted-foreground"
                     }`}
                   >
                     {g}
@@ -203,8 +201,8 @@ const Setup = () => {
                   <button
                     key={s}
                     onClick={() => setGuestAvatarStyle(s)}
-                    className={`flex-1 rounded-lg border px-2 py-1.5 text-xs capitalize transition-all ${
-                      guestAvatarStyle === s ? "border-primary bg-primary/10 text-primary" : "border-border"
+                    className={`flex-1 rounded-lg border px-2 py-2 text-xs capitalize transition-all ${
+                      guestAvatarStyle === s ? "border-primary bg-primary/10 text-primary font-medium" : "border-border text-muted-foreground"
                     }`}
                   >
                     {s}
@@ -221,7 +219,7 @@ const Setup = () => {
                       className={`flex h-14 w-14 items-center justify-center rounded-full border-2 transition-all ${
                         guestAvatar === a.id ? "border-primary scale-110" : "border-transparent"
                       }`}
-                      style={{ background: a.colors.bg + "33" }}
+                      style={{ background: a.colors.bg + "22" }}
                     >
                       <AvatarSVG variant={idx} size={40} colors={a.colors} />
                     </button>
@@ -234,13 +232,13 @@ const Setup = () => {
           {/* Background */}
           <div className="space-y-3">
             <SectionTitle>Background</SectionTitle>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {BACKGROUND_PRESETS.map((bg) => (
                 <button
                   key={bg.id}
                   onClick={() => setBackground(bg.id as BackgroundPreset)}
-                  className={`h-20 w-32 rounded-xl border-2 transition-all ${
-                    background === bg.id ? "border-primary scale-105" : "border-transparent"
+                  className={`h-20 rounded-xl border-2 transition-all ${
+                    background === bg.id ? "border-primary scale-[1.03]" : "border-transparent"
                   }`}
                   style={{ background: bg.gradient }}
                 >
@@ -253,17 +251,17 @@ const Setup = () => {
           {/* Studio Preview */}
           {guestAvatar && (
             <div className="space-y-3">
-              <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-muted-foreground">Studio Preview</h3>
+              <SectionTitle>Studio Preview</SectionTitle>
               <StudioPreview guestAvatarId={guestAvatar} backgroundId={background} />
             </div>
           )}
 
-          {/* Enter Live Room */}
+          {/* CTA */}
           <Button
             size="lg"
             disabled={!topic.trim()}
             onClick={handleStart}
-            className="gap-2 self-center rounded-xl px-12 py-6 text-lg font-bold"
+            className="gap-2 self-stretch rounded-xl py-6 text-base font-bold sm:self-center sm:px-16"
           >
             <Radio className="h-5 w-5" />
             Enter Live Room
