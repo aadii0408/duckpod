@@ -1,159 +1,164 @@
-# DuckPod
+# 🦆 DuckPod
 
-Human-first AI Podcast Studio.  
+**Human-first AI Podcast Studio**  
 AI can speak. Humans decide if it deserves trust.
 
-🔗 Live App: https://duckpod.lovable.app
+Live App: https://duckpod.lovable.app
+## 👥 Core Team
+
+| Name | Role | GitHub |
+|------|------|--------|
+| Aaditya Champaneri | [@aadii0408](https://github.com/aadii0408) |
+| Rushi Lunagariya | [@Rushi7667](https://github.com/Rushi7667) |
+| Charmil Patel | [@Charmil-13](https://github.com/Charmil-13) |
+---
+
+## 🚀 What is DuckPod?
+
+DuckPod is an *AI-powered podcast studio* with a built-in **human trust evaluation system** designed to challenge the common assumption that fluent AI output equals reliable information.
+
+AI hosts the show —  
+Humans deliver the final verdict.
+
+This isn’t AI judging itself.  
+This is **Human-as-Judge**. :contentReference[oaicite:0]{index=0}
 
 ---
 
-## Overview
+## 🎯 Core Concept
 
-DuckPod is an AI-powered podcast studio with a built-in human trust evaluation system.
+AI systems are:
+- Fast
+- Fluent
+- Confident
 
-It generates short AI-hosted podcast episodes and then requires a human audit using a structured rubric to determine reliability, grounding, and hallucination risk.
-
-This is not AI judging itself.  
-This is Human-as-Judge.
-
----
-
-## Core Concept
-
-AI-generated content is fast, fluent, and confident.  
-Confidence is not accuracy.
+But **confidence is not accuracy**.
 
 DuckPod enforces:
-
 - Structured evaluation
 - Human scoring
 - Hallucination detection
-- Trust score generation (0–100)
+- Trust score generation
 
-Trust is earned, not assumed.
+Trust is **earned**, not assumed. :contentReference[oaicite:1]{index=1}
 
 ---
 
-## Features
+## 🧠 How It Works
 
-### AI Podcast Generation
-- Topic-based episode creation
-- Host + guest conversational format
-- Structured transcript rendering
-- Multi-turn dialogue flow
+1️⃣ **AI Podcast Generation**  
+   - Topic-based episodic creation  
+   - Host + guest dialogue  
+   - Structured transcript output  
 
-### Human Evaluation Layer
-After each episode, users score the content across five trust dimensions:
+2️⃣ **Human Evaluation Layer**  
+   After listening or reading the generated podcast, users score it across five trust dimensions: Grounding, Consistency, Transparency, Manipulation Resistance, and Usefulness. :contentReference[oaicite:2]{index=2}
 
+3️⃣ **Trust Score Calculation (0–100)**  
+   Uses a weighted formula to generate a final score highlighting reliability.
+
+4️⃣ **Hallucination Detection**  
+   If unsupported claims are identified, or core metrics are low, DuckPod flags potential hallucination. :contentReference[oaicite:3]{index=3}
+
+---
+
+## 📊 Trust Scoring Rubric
+
+| Score Range | Verdict |
+|-------------|---------|
+| 80–100      | Highly Reliable |
+| 60–79       | Moderately Reliable |
+| 40–59       | Risky – Review Claims |
+| 0–39        | Low Trust – Likely Hallucination |
+
+This scoring not only evaluates AI content, it teaches critical thinking. :contentReference[oaicite:4]{index=4}
+
+---
+
+## 🧩 Features
+
+### 🎙️ AI Podcast Generation
+- Topic-driven narratives
+- Structured, multi-turn dialogue
+- Transcript rendering
+
+### 🧠 Trust Evaluation
 - Grounding (facts vs vibes)
 - Consistency
-- Transparency (admits uncertainty)
-- Manipulation Resistance (no authority bluffing)
-- Usefulness (actionable, not fluff)
+- Transparency (uncertainty acknowledged)
+- Manipulation resistance
+- Usefulness (practical value)
 
-### Trust Score (0–100)
-
-Weighted formula:
-
-TrustScore =  
-(Grounding × 0.30 +  
-Consistency × 0.20 +  
-Transparency × 0.20 +  
-ManipulationResistance × 0.15 +  
-Usefulness × 0.15) × 10  
-
-Grounding carries the highest weight to reinforce fact-based reliability.
-
-### Hallucination Detection
-
-Hallucination is flagged when:
-
-- Grounding < 5 AND Transparency < 5  
-OR  
-- User marks unsupported claims  
-
-Outputs:
-
-- Trust Score: 0–100  
-- Hallucination Caught: Yes / No  
-- Reliability Verdict  
+### 🛡 Reliability Output
+- Trust Score
+- Hallucination flag
+- Human verdict dashboard :contentReference[oaicite:5]{index=5}
 
 ---
 
-## Product Flow
+## 🛠 Architecture Overview
 
-1. Setup  
-   - Enter topic  
-   - Configure episode  
-   - Generate AI podcast  
+**Frontend**  
+– Built with Lovable  
+– Structured UX for generation → evaluation → verdict
 
-2. Studio  
-   - View transcript  
-   - Observe structured discussion  
+**AI Layer**  
+– Gemini API for generation  
+– Structured extraction and scoring pass
 
-3. Reflection  
-   - Fill rubric sliders  
-   - Submit human evaluation  
-
-4. Trust Report  
-   - Trust Score displayed  
-   - Hallucination detection result  
-   - Reliability classification  
+**Database**  
+– Supabase for session & trust data persistence :contentReference[oaicite:6]{index=6}
 
 ---
 
-## Trust Scale
+## 🎯 Why DuckPod Exists
 
-| Score | Verdict |
-|--------|----------|
-| 80–100 | Highly Reliable |
-| 60–79  | Moderately Reliable |
-| 40–59  | Risky – Review Claims |
-| 0–39   | Low Trust – Likely Hallucination |
+AI systems are powerful —  
+but they are not inherently trustworthy.
 
----
-
-## Architecture Overview
-
-Frontend  
-- Built with Lovable  
-- Multi-page structured flow  
-- Deterministic scoring logic  
-
-AI Layer  
-- Gemini API for podcast generation  
-- Structured claim extraction  
-- Optional red-flag verification pass  
-
-Database  
-- Supabase for session storage  
-- Reflection storage  
-- Trust score persistence  
+DuckPod keeps humans in control of the narrative and the final verdict.  
+AI can **host the show**.  
+Humans decide if it **tells the truth**. :contentReference[oaicite:7]{index=7}
 
 ---
 
-## Why DuckPod Exists
+## 🔮 Future Enhancements
 
-AI systems are powerful.  
-But they are not inherently trustworthy.
-
-DuckPod keeps humans in control of the narrative and the final verdict.
-
-AI can host the show.  
-Humans decide if it tells the truth.
-
----
-
-## Future Enhancements
-
-- Citation-required mode  
-- Adversarial questioning mode  
-- Multi-model comparison  
-- Confidence gap detection  
-- Shareable Trust Cards  
+Upcoming capabilities:
+- Citation-required mode
+- Adversarial questioning
+- Multi-model comparisons
+- Confidence gap analytics
+- Shareable trust cards :contentReference[oaicite:8]{index=8}
 
 ---
 
-## License
+## 📦 Tech Stack
 
-MIT License
+- TypeScript
+- Tailwind CSS
+- Supabase
+- Gemini API
+- Lovable UI :contentReference[oaicite:9]{index=9}
+
+---
+
+## 📜 License
+
+DuckPod is released under the **MIT License**. :contentReference[oaicite:10]{index=10}
+
+---
+
+## 🧑‍💻 Contributing
+
+1. Fork the repo  
+2. Create a feature branch  
+3. Submit a pull request
+
+Help DuckPod become the gold standard in human-centered AI evaluation.
+
+---
+
+## 📌 Acknowledgements
+
+Built by Aaditya Champaneri. :contentReference[oaicite:11]{index=11}
