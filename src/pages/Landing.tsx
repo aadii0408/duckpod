@@ -170,6 +170,46 @@ const Landing = () => {
         </div>
       </motion.section>
 
+      {/* Anti-AI Philosophy */}
+      <motion.section
+        className="relative z-10 mt-20 w-full max-w-5xl section-padding"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+      >
+        <h2 className="mb-3 text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          Our Philosophy
+        </h2>
+        <p className="mx-auto mb-8 max-w-xl text-center text-sm text-muted-foreground">
+          DuckPod is proudly <span className="font-semibold text-primary">Anti-AI</span> — not against AI itself, but against AI replacing human creativity.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            {
+              emoji: "🎛️",
+              title: "Human Director, AI Performer",
+              desc: "You pick the topic, set the energy, choose personas, and steer the conversation in real-time. AI generates content — you shape the narrative.",
+            },
+            {
+              emoji: "🛡️",
+              title: "Built-In Accountability",
+              desc: "Every session ends with a mandatory reflection and Trust Score rubric. You rate the AI on grounding, consistency, and transparency — catching hallucinations before they spread.",
+            },
+            {
+              emoji: "🎵",
+              title: "AI is the Instrument",
+              desc: "Just like a guitar doesn't write songs, AI doesn't create podcasts. DuckPod is a creative instrument played by curious humans who refuse to outsource their thinking.",
+            },
+          ].map(({ emoji, title, desc }) => (
+            <div key={title} className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/[0.03] p-5">
+              <span className="text-2xl">{emoji}</span>
+              <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+              <p className="text-xs leading-relaxed text-muted-foreground">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </motion.section>
+
       {/* Conversation preview */}
       <motion.section
         className="relative z-10 mt-20 w-full max-w-3xl section-padding pb-20"
