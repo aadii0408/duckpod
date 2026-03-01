@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import type { AvatarOption, Speaker } from "@/lib/types";
+import type { Speaker } from "@/lib/types";
 import { AVATARS } from "@/lib/constants";
+import AvatarSVG from "./AvatarSVG";
 
 interface AvatarCardProps {
   speaker: Speaker;
@@ -13,7 +14,9 @@ const AvatarCard = ({ speaker, avatarId, isSpeaking, amplitude }: AvatarCardProp
   const avatar = AVATARS.find((a) => a.id === avatarId);
   const colors = avatar?.colors ?? { bg: "hsl(168, 80%, 50%)", skin: "hsl(30, 60%, 70%)", accent: "hsl(270, 60%, 60%)" };
   const label = avatar?.label ?? speaker;
-  const mouthScale = 0.2 + amplitude * 0.8;
+  
+  // Extract variant index from avatar id (e.g. "realistic-2" → 2)
+  const variantIdx = parseInt(avatarId.split("-").pop() || "0", 10);
 
   return (
     <motion.div
@@ -34,33 +37,14 @@ const AvatarCard = ({ speaker, avatarId, isSpeaking, amplitude }: AvatarCardProp
         {speaker}
       </span>
 
-      {/* Avatar circle */}
-      <div
-        className="relative flex h-28 w-28 items-center justify-center rounded-full"
-        style={{ background: colors.bg }}
-      >
-        {/* Head */}
-        <div
-          className="absolute h-16 w-14 rounded-full"
-          style={{ background: colors.skin, top: "12%" }}
-        />
-        {/* Eyes */}
-        <div className="absolute flex gap-3" style={{ top: "32%" }}>
-          <div className="h-2 w-2 rounded-full bg-background" />
-          <div className="h-2 w-2 rounded-full bg-background" />
-        </div>
-        {/* Mouth - amplitude animated */}
-        <motion.div
-          className="absolute rounded-full"
-          style={{
-            background: "hsl(0, 0%, 20%)",
-            top: "52%",
-            width: 12,
-          }}
-          animate={{ height: 4 + mouthScale * 10, borderRadius: mouthScale > 0.5 ? "50%" : "999px" }}
-          transition={{ duration: 0.05 }}
-        />
-      </div>
+      {/* Illustrated SVG Avatar */}
+      <AvatarSVG
+        variant={variantIdx}
+        mouthScale={amplitude}
+        isSpeaking={isSpeaking}
+        size={128}
+        colors={colors}
+      />
 
       {/* Name */}
       <p className="text-sm font-medium text-foreground">{label}</p>

@@ -24,6 +24,7 @@ import {
   DURATION_OPTIONS,
 } from "@/lib/constants";
 import { Link } from "react-router-dom";
+import StudioPreview from "@/components/StudioPreview";
 
 const Setup = () => {
   const navigate = useNavigate();
@@ -328,6 +329,14 @@ const Setup = () => {
               ))}
             </div>
           </div>
+
+          {/* Studio Preview */}
+          {hostAvatar && guestAvatar && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground text-center">Studio Preview</h3>
+              <StudioPreview hostAvatarId={hostAvatar} guestAvatarId={guestAvatar} backgroundId={background} />
+            </div>
+          )}
 
           {/* Enter Live Room */}
           <Button
