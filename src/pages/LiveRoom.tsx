@@ -31,9 +31,22 @@ const LiveRoom = () => {
   const steerRef = useRef("");
   const transcriptRef = useRef<TurnMessage[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const skipTurnRef = useRef(false);
 
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
+
+  // Pause/resume audio when isPaused changes
+  useEffect(() => {
+    const audio = currentAudioRef.current;
+    if (!audio) return;
+    if (isPaused && !audio.paused) {
+      audio.pause();
+    } else if (!isPaused && audio.paused && !audio.ended) {
+      audio.play().catch(() => {});
+    }
+  }, [isPaused]);
 
   useEffect(() => {
     if (!settings) navigate("/setup");
@@ -94,6 +107,16 @@ const LiveRoom = () => {
     return formatTime(Math.max(0, limit - timeElapsed));
   };
 
+  const stopCurrentAudio = () => {
+    const audio = currentAudioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.dispatchEvent(new Event("ended"));
+    }
+    skipTurnRef.current = true;
+  };
+
   const runTurn = useCallback(async (speaker: Speaker) => {
     if (!settings || sessionEndedRef.current) return;
 
@@ -102,6 +125,7 @@ const LiveRoom = () => {
     }
     if (sessionEndedRef.current) return;
 
+    skipTurnRef.current = false;
     setIsGenerating(true);
     setCurrentSpeaker(speaker);
 
@@ -151,8 +175,11 @@ const LiveRoom = () => {
 
       await playTTS(turnText, speaker === "HOST" ? RAJ_HOST.voiceId : settings.guestVoiceId);
 
-      if (!sessionEndedRef.current) {
+      if (!sessionEndedRef.current && !skipTurnRef.current) {
         await new Promise((r) => setTimeout(r, 600));
+        runTurn(speaker === "HOST" ? "GUEST" : "HOST");
+      } else if (skipTurnRef.current && !sessionEndedRef.current) {
+        skipTurnRef.current = false;
         runTurn(speaker === "HOST" ? "GUEST" : "HOST");
       }
     } catch (err: any) {
@@ -182,6 +209,20 @@ const LiveRoom = () => {
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
+      currentAudioRef.current = audio;
+
+      // If already paused, don't auto-play yet
+      if (isPausedRef.current) {
+        await new Promise<void>((resolve) => {
+          const checkResume = setInterval(() => {
+            if (!isPausedRef.current || sessionEndedRef.current) {
+              clearInterval(checkResume);
+              resolve();
+            }
+          }, 300);
+        });
+        if (sessionEndedRef.current) { currentAudioRef.current = null; return; }
+      }
 
       setIsSpeaking(true);
 
@@ -198,7 +239,8 @@ const LiveRoom = () => {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
         const trackAmplitude = () => {
-          if (audio.paused || audio.ended) { setAmplitude(0); setIsSpeaking(false); return; }
+          if (audio.paused && !isPausedRef.current) { setAmplitude(0); return; }
+          if (audio.ended) { setAmplitude(0); setIsSpeaking(false); return; }
           analyser.getByteFrequencyData(dataArray);
           const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length / 255;
           setAmplitude(avg);
@@ -207,7 +249,8 @@ const LiveRoom = () => {
         audio.onplay = trackAmplitude;
       } catch {
         const simulateAmp = () => {
-          if (audio.paused || audio.ended) { setAmplitude(0); setIsSpeaking(false); return; }
+          if (audio.paused && !isPausedRef.current) { setAmplitude(0); return; }
+          if (audio.ended) { setAmplitude(0); setIsSpeaking(false); return; }
           setAmplitude(0.3 + Math.random() * 0.5);
           requestAnimationFrame(simulateAmp);
         };
@@ -220,6 +263,7 @@ const LiveRoom = () => {
           URL.revokeObjectURL(audioUrl);
           setIsSpeaking(false);
           setAmplitude(0);
+          currentAudioRef.current = null;
           resolve();
         };
       });
@@ -231,7 +275,10 @@ const LiveRoom = () => {
       await new Promise<void>((resolve) => {
         const animate = () => {
           const elapsed = Date.now() - start;
-          if (elapsed >= duration) { setAmplitude(0); setIsSpeaking(false); resolve(); return; }
+          if (elapsed >= duration || skipTurnRef.current || sessionEndedRef.current) {
+            setAmplitude(0); setIsSpeaking(false); resolve(); return;
+          }
+          if (isPausedRef.current) { requestAnimationFrame(animate); return; }
           setAmplitude(0.2 + Math.random() * 0.6);
           requestAnimationFrame(animate);
         };
@@ -242,6 +289,7 @@ const LiveRoom = () => {
 
   const handleEndSession = async () => {
     sessionEndedRef.current = true;
+    stopCurrentAudio();
     setIsSpeaking(false);
     setAmplitude(0);
     clearInterval(timerRef.current);
@@ -274,6 +322,11 @@ const LiveRoom = () => {
     }
   };
 
+  const handleTogglePause = () => {
+    setIsPaused((prev) => !prev);
+    toast({ title: isPaused ? "Resumed" : "Paused", description: isPaused ? "Conversation resumed." : "Conversation paused." });
+  };
+
   const handleSteer = (directive: string) => {
     steerRef.current = directive;
     toast({ title: "Directive set", description: `"${directive}" will apply on the next turn.` });
@@ -281,12 +334,14 @@ const LiveRoom = () => {
 
   const handleNextQuestion = () => {
     steerRef.current = "Move to next question immediately";
-    toast({ title: "Next question", description: "Will skip to a new question on the next turn." });
+    stopCurrentAudio();
+    toast({ title: "Skipping ahead", description: "Moving to the next question." });
   };
 
   const handleInterrupt = () => {
     steerRef.current = "Host interrupts with a probing follow-up";
-    toast({ title: "Interrupt queued", description: "Raj will interrupt on the next turn." });
+    stopCurrentAudio();
+    toast({ title: "Interrupting", description: "Raj will jump in now." });
   };
 
   if (!settings) return null;
@@ -326,6 +381,11 @@ const LiveRoom = () => {
               Generating…
             </span>
           )}
+          {isPaused && (
+            <span className="rounded-full bg-destructive/20 px-2 py-0.5 text-[10px] font-semibold text-destructive">
+              PAUSED
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <span className="font-mono text-lg font-bold text-foreground">{getDurationDisplay()}</span>
@@ -359,7 +419,7 @@ const LiveRoom = () => {
           <div className="border-t border-border/20 px-4 pb-3 pt-2">
             <LiveControls
               isPaused={isPaused}
-              onTogglePause={() => setIsPaused(!isPaused)}
+              onTogglePause={handleTogglePause}
               onNextQuestion={handleNextQuestion}
               onInterrupt={handleInterrupt}
               onSteer={handleSteer}

@@ -254,7 +254,7 @@ const Setup = () => {
           {guestAvatar && (
             <div className="space-y-3">
               <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-muted-foreground">Studio Preview</h3>
-              <StudioPreview hostAvatarId={RAJ_HOST.avatarId} guestAvatarId={guestAvatar} backgroundId={background} />
+              <StudioPreview guestAvatarId={guestAvatar} backgroundId={background} />
             </div>
           )}
 

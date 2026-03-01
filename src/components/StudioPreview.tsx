@@ -1,18 +1,15 @@
 import AvatarSVG from "./AvatarSVG";
-import { AVATARS, BACKGROUND_PRESETS } from "@/lib/constants";
+import { AVATARS, BACKGROUND_PRESETS, RAJ_HOST } from "@/lib/constants";
 
 interface StudioPreviewProps {
-  hostAvatarId: string;
   guestAvatarId: string;
   backgroundId: string;
 }
 
-const StudioPreview = ({ hostAvatarId, guestAvatarId, backgroundId }: StudioPreviewProps) => {
-  const hostAvatar = AVATARS.find((a) => a.id === hostAvatarId);
+const StudioPreview = ({ guestAvatarId, backgroundId }: StudioPreviewProps) => {
   const guestAvatar = AVATARS.find((a) => a.id === guestAvatarId);
   const bg = BACKGROUND_PRESETS.find((b) => b.id === backgroundId);
 
-  const hostVariant = parseInt(hostAvatarId.split("-").pop() || "0", 10);
   const guestVariant = parseInt(guestAvatarId.split("-").pop() || "0", 10);
 
   return (
@@ -23,13 +20,13 @@ const StudioPreview = ({ hostAvatarId, guestAvatarId, backgroundId }: StudioPrev
       <div className="flex flex-col items-center gap-2">
         <div className="rounded-2xl border border-border/30 bg-background/30 p-4 backdrop-blur-sm">
           <AvatarSVG
-            variant={hostVariant}
+            variant={RAJ_HOST.avatarVariant}
             size={96}
-            colors={hostAvatar?.colors ?? { bg: "hsl(168,80%,50%)", skin: "hsl(30,60%,70%)", accent: "hsl(270,60%,60%)" }}
+            colors={RAJ_HOST.colors}
           />
         </div>
         <span className="text-xs font-semibold uppercase text-muted-foreground">Host</span>
-        <span className="text-sm font-medium text-foreground">{hostAvatar?.label ?? "Host"}</span>
+        <span className="text-sm font-medium text-foreground">{RAJ_HOST.name}</span>
       </div>
 
       <div className="text-2xl text-muted-foreground/30">×</div>
