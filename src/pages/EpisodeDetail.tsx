@@ -1,29 +1,54 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Download, Clock, Hash } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Clock, Hash, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import TranscriptPanel from "@/components/TranscriptPanel";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import type { TurnMessage } from "@/lib/types";
 
 const EpisodeDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [episode, setEpisode] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchEp = async () => {
       const { data, error } = await supabase
         .from("episodes")
         .select("*")
         .eq("id", id)
         .single();
-
       if (!error && data) setEpisode(data);
       setLoading(false);
     };
-    fetch();
+    fetchEp();
   }, [id]);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    const { error } = await supabase.from("episodes").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Failed to delete", description: error.message, variant: "destructive" });
+      setDeleting(false);
+    } else {
+      toast({ title: "Episode deleted" });
+      navigate("/episodes");
+    }
+  };
 
   if (loading) {
     return (
@@ -49,18 +74,46 @@ const EpisodeDetail = () => {
     <div className="section-padding py-6 sm:py-10">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
-        <div className="mb-6 flex items-start gap-3">
-          <Button variant="ghost" size="icon" asChild className="mt-1 shrink-0">
-            <Link to="/episodes"><ArrowLeft className="h-4 w-4" /></Link>
-          </Button>
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold sm:text-2xl">{showNotes?.title || episode.topic}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{Math.floor(episode.duration / 60)} min</span>
-              <span className="flex items-center gap-1"><Hash className="h-3.5 w-3.5" />{transcript.length} turns</span>
-              <span>{new Date(episode.created_at).toLocaleDateString()}</span>
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Button variant="ghost" size="icon" asChild className="mt-1 shrink-0">
+              <Link to="/episodes"><ArrowLeft className="h-4 w-4" /></Link>
+            </Button>
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold sm:text-2xl">{showNotes?.title || episode.topic}</h1>
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{Math.floor(episode.duration / 60)} min</span>
+                <span className="flex items-center gap-1"><Hash className="h-3.5 w-3.5" />{transcript.length} turns</span>
+                <span>{new Date(episode.created_at).toLocaleDateString()}</span>
+              </div>
             </div>
           </div>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="shrink-0 gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={deleting}>
+                <Trash2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Delete</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this episode?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently remove "{episode.topic}" and its transcript. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         <div className="flex flex-col gap-5">
