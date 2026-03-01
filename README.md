@@ -1,73 +1,159 @@
-# Welcome to your Lovable project
+# DuckPod
 
-## Project info
+Human-first AI Podcast Studio.  
+AI can speak. Humans decide if it deserves trust.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+🔗 Live App: https://duckpod.lovable.app
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Overview
 
-**Use Lovable**
+DuckPod is an AI-powered podcast studio with a built-in human trust evaluation system.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+It generates short AI-hosted podcast episodes and then requires a human audit using a structured rubric to determine reliability, grounding, and hallucination risk.
 
-Changes made via Lovable will be committed automatically to this repo.
+This is not AI judging itself.  
+This is Human-as-Judge.
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Core Concept
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+AI-generated content is fast, fluent, and confident.  
+Confidence is not accuracy.
 
-Follow these steps:
+DuckPod enforces:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- Structured evaluation
+- Human scoring
+- Hallucination detection
+- Trust score generation (0–100)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Trust is earned, not assumed.
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Features
 
-**Edit a file directly in GitHub**
+### AI Podcast Generation
+- Topic-based episode creation
+- Host + guest conversational format
+- Structured transcript rendering
+- Multi-turn dialogue flow
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Human Evaluation Layer
+After each episode, users score the content across five trust dimensions:
 
-**Use GitHub Codespaces**
+- Grounding (facts vs vibes)
+- Consistency
+- Transparency (admits uncertainty)
+- Manipulation Resistance (no authority bluffing)
+- Usefulness (actionable, not fluff)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Trust Score (0–100)
 
-## What technologies are used for this project?
+Weighted formula:
 
-This project is built with:
+TrustScore =  
+(Grounding × 0.30 +  
+Consistency × 0.20 +  
+Transparency × 0.20 +  
+ManipulationResistance × 0.15 +  
+Usefulness × 0.15) × 10  
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Grounding carries the highest weight to reinforce fact-based reliability.
 
-## How can I deploy this project?
+### Hallucination Detection
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Hallucination is flagged when:
 
-## Can I connect a custom domain to my Lovable project?
+- Grounding < 5 AND Transparency < 5  
+OR  
+- User marks unsupported claims  
 
-Yes, you can!
+Outputs:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Trust Score: 0–100  
+- Hallucination Caught: Yes / No  
+- Reliability Verdict  
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+---
+
+## Product Flow
+
+1. Setup  
+   - Enter topic  
+   - Configure episode  
+   - Generate AI podcast  
+
+2. Studio  
+   - View transcript  
+   - Observe structured discussion  
+
+3. Reflection  
+   - Fill rubric sliders  
+   - Submit human evaluation  
+
+4. Trust Report  
+   - Trust Score displayed  
+   - Hallucination detection result  
+   - Reliability classification  
+
+---
+
+## Trust Scale
+
+| Score | Verdict |
+|--------|----------|
+| 80–100 | Highly Reliable |
+| 60–79  | Moderately Reliable |
+| 40–59  | Risky – Review Claims |
+| 0–39   | Low Trust – Likely Hallucination |
+
+---
+
+## Architecture Overview
+
+Frontend  
+- Built with Lovable  
+- Multi-page structured flow  
+- Deterministic scoring logic  
+
+AI Layer  
+- Gemini API for podcast generation  
+- Structured claim extraction  
+- Optional red-flag verification pass  
+
+Database  
+- Supabase for session storage  
+- Reflection storage  
+- Trust score persistence  
+
+---
+
+## Why DuckPod Exists
+
+AI systems are powerful.  
+But they are not inherently trustworthy.
+
+DuckPod keeps humans in control of the narrative and the final verdict.
+
+AI can host the show.  
+Humans decide if it tells the truth.
+
+---
+
+## Future Enhancements
+
+- Citation-required mode  
+- Adversarial questioning mode  
+- Multi-model comparison  
+- Confidence gap detection  
+- Shareable Trust Cards  
+
+---
+
+## License
+
+MIT License
