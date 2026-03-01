@@ -1,70 +1,44 @@
 
 
-# DuckPod — UI Polish + Avatar Enhancement Plan
+# Trust Score Rubric — Implementation Plan
 
-Based on the user's feedback, there are four areas to address. Here's what currently exists and what needs to change.
+## What Gets Added
 
-## Current State
+After the user submits the existing 3-question reflection form and sees the Anti-AI reasons, a **new section** appears: the **Trust Score Rubric**.
 
-The app has a working 4-page flow: Landing → Setup → Live Room → Session End, plus Episodes/EpisodeDetail. Avatars are colored circles with simple eyes/mouth shapes. The UI is functional but feels like a prototype — minimal storytelling, no visual narrative, avatars are abstract colored dots.
+### Trust Score Rubric UI
 
----
+Five labeled sliders (0–10), each with a description:
 
-## 1. Story-Driven UI Flow
+| Slider | Weight | Description |
+|---|---|---|
+| Grounding | 0.30 | Facts vs vibes — did the AI stick to verifiable claims? |
+| Consistency | 0.20 | Did the AI contradict itself across turns? |
+| Transparency | 0.20 | Did the AI admit when it was uncertain? |
+| Manipulation Resistance | 0.15 | Did the AI avoid authority bluffing or emotional pressure? |
+| Usefulness | 0.15 | Was the output actionable, not generic fluff? |
 
-Make each page feel like a step in a product journey, not just a form.
+Plus a checkbox: **"I spotted an unsupported claim"**
 
-**Landing page**: Add a "How it works" section below the hero with 3 steps (Pick a topic → Watch the conversation → Save & share). Add a mini demo/preview section showing a mock conversation snippet to sell the experience before the user clicks "Start."
+### Computed Outputs (live, updates as sliders move)
 
-**Setup page**: Add a "preview card" at the bottom that shows the selected Host + Guest avatars side-by-side on the chosen background — a live preview of what the studio will look like. This makes the setup feel purposeful.
+- **Trust Score (0–100)**: `Math.round(Math.min(100, Math.max(0, (G*0.30 + C*0.20 + T*0.20 + MR*0.15 + U*0.15) * 10)))`
+- **Hallucination Caught**: Yes if `(Grounding < 5 AND Transparency < 5) OR unsupportedClaimChecked`
+- Visual: score displayed in a large circular gauge with color coding (green > 70, yellow 40–70, red < 40)
 
-**Live Room**: Add a brief "Going Live" countdown animation (3...2...1...) before the first turn starts, to build anticipation.
+### Flow
 
-**Session End**: Add a share-ready "Episode Card" — a styled card with the episode title, duration, and a visual that users could screenshot/share.
+1. User fills reflection form (existing) → submits → sees Anti-AI reasons (existing)
+2. Below the Anti-AI reasons, the **Trust Score Rubric** card appears with animation
+3. User adjusts sliders → score updates live
+4. User clicks "Submit Score" → final result card replaces sliders showing score + hallucination verdict
 
-## 2. Avatar Upgrade — Animated Illustrated Characters
+### File Changes
 
-Replace the plain colored circles with proper illustrated SVG avatars rendered inline. Each avatar will have:
-- A distinct head shape, hairstyle, and accessory (glasses, headphones, etc.)
-- Inline SVG so the mouth element can be animated in real-time
-- The mouth element scales based on audio amplitude (already wired)
-- A subtle idle animation (gentle breathing/sway) when not speaking
-
-This keeps everything performant (no GIFs/external assets needed) while looking polished. Six distinct character designs per style category (realistic = more detailed SVG, 3D = bold/rounded shapes, minimal = simple geometric).
-
-## 3. Consistent Host Identity
-
-- Make the Host avatar and personality persist across the app — show the Host avatar on the Landing page hero, in the Setup page header, and in the Episodes list.
-- Add a small "Your Host" section on the Landing page featuring the default host avatar with a tagline.
-- The host avatar selection in Setup becomes "Choose your Host's look" rather than feeling disconnected.
-
-## 4. Backend Already Connected
-
-The backend (database + AI gateway) is already wired. This plan focuses on the frontend improvements only. No backend changes needed.
-
----
-
-## Technical Approach
-
-### New/Modified Files
-
-| File | Change |
-|---|---|
-| `src/components/AvatarSVG.tsx` | New component: inline SVG avatar renderer with 6 character designs per style, animatable mouth |
-| `src/components/AvatarCard.tsx` | Replace colored circle with `AvatarSVG`, add idle sway animation |
-| `src/pages/Landing.tsx` | Add "How it works" steps, host avatar preview, mock conversation snippet |
-| `src/pages/Setup.tsx` | Add live studio preview card at bottom showing selected avatars on background |
-| `src/pages/LiveRoom.tsx` | Add 3-2-1 countdown before first turn |
-| `src/pages/SessionEnd.tsx` | Add shareable episode card component |
-| `src/lib/constants.ts` | Update avatar definitions with SVG variant identifiers |
-
-### Avatar SVG Design
-
-Each avatar is a self-contained SVG component that accepts props:
-- `variant` (which of the 6 characters)
-- `style` (realistic/3d/minimal — affects detail level)
-- `mouthScale` (0-1, drives mouth animation)
-- `isSpeaking` (toggles glow + breathing animation)
-
-The SVG includes: head, hair, eyes, mouth (the animated element), and optional accessories. Mouth is a `<ellipse>` or `<path>` whose `ry` scales with amplitude.
+**`src/pages/SessionEnd.tsx`** — the only file modified:
+- Add state for 5 slider values (default 5), unsupported claim checkbox, and `rubricSubmitted` boolean
+- After the Anti-AI reasons block (`formSubmitted === true`), render the rubric card
+- Import `Slider` from `@/components/ui/slider` and `Checkbox` from `@/components/ui/checkbox`
+- Compute trust score and hallucination flag reactively from slider state
+- After rubric submission, show a result card with the final score, color-coded badge, and hallucination status
 
