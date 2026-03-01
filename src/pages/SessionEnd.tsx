@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import TranscriptPanel from "@/components/TranscriptPanel";
 import AvatarSVG from "@/components/AvatarSVG";
+import TrustScoreRubric from "@/components/TrustScoreRubric";
 import { AVATARS, BACKGROUND_PRESETS, RAJ_HOST } from "@/lib/constants";
 import type { SessionSettings, TurnMessage } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
@@ -193,6 +194,11 @@ const SessionEnd = () => {
                 AI is the instrument. You are the musician. 🎵
               </p>
             </motion.div>
+          )}
+
+          {/* Trust Score Rubric — appears after reflection submitted */}
+          {formSubmitted && (
+            <TrustScoreRubric />
           )}
 
           {/* Show notes */}
