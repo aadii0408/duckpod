@@ -1,7 +1,7 @@
 # DuckPod 🚀
 
 **Human-first AI Podcast Studio**  
-##  Tracks: **MLH Best Use of ElevenLabs · Anti-AI**
+##  **MLH Best Use of ElevenLabs · Tracks: Anti-AI**
 AI can speak. Humans decide if it deserves trust.
 
 Live App: https://duckpod.lovable.app
@@ -18,7 +18,7 @@ Live App: https://duckpod.lovable.app
 
 DuckPod is an *AI-powered podcast studio* with a built-in **human trust evaluation system** designed to challenge the common assumption that fluent AI output equals reliable information.
 
-AI hosts the show —  
+AI hosts the show, 
 Humans deliver the final verdict.
 
 This isn’t AI judging itself.  
