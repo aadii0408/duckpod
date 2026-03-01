@@ -8,6 +8,7 @@ import TranscriptPanel from "@/components/TranscriptPanel";
 import LiveControls from "@/components/LiveControls";
 import { BACKGROUND_PRESETS } from "@/lib/constants";
 import type { SessionSettings, TurnMessage, SessionMemory, Speaker } from "@/lib/types";
+import { toast } from "@/hooks/use-toast";
 
 const LiveRoom = () => {
   const location = useLocation();
@@ -21,11 +22,18 @@ const LiveRoom = () => {
   const [amplitude, setAmplitude] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
-  const [sessionEnded, setSessionEnded] = useState(false);
+  const sessionEndedRef = useRef(false);
+  const isPausedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval>>();
   const memoryRef = useRef<SessionMemory | null>(null);
-  const producerNoteRef = useRef<string>("");
-  const steerRef = useRef<string>("");
+  const producerNoteRef = useRef("");
+  const steerRef = useRef("");
+  const transcriptRef = useRef<TurnMessage[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // Keep refs in sync
+  useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
+  useEffect(() => { transcriptRef.current = transcript; }, [transcript]);
 
   // Redirect if no settings
   useEffect(() => {
@@ -34,21 +42,21 @@ const LiveRoom = () => {
 
   // Timer
   useEffect(() => {
-    if (isPaused || sessionEnded) return;
+    if (isPaused || sessionEndedRef.current) return;
     timerRef.current = setInterval(() => setTimeElapsed((t) => t + 1), 1000);
     return () => clearInterval(timerRef.current);
-  }, [isPaused, sessionEnded]);
+  }, [isPaused]);
 
   // Check duration limit
   useEffect(() => {
     if (!settings || settings.duration === "unlimited") return;
     const limit = parseInt(settings.duration) * 60;
-    if (timeElapsed >= limit) {
+    if (timeElapsed >= limit && !sessionEndedRef.current) {
       handleEndSession();
     }
   }, [timeElapsed, settings]);
 
-  // Initialize session memory
+  // Initialize session
   useEffect(() => {
     if (!settings) return;
     memoryRef.current = {
@@ -59,8 +67,7 @@ const LiveRoom = () => {
       timeRemainingSeconds: settings.duration === "unlimited" ? 9999 : parseInt(settings.duration) * 60,
       turnCount: 0,
     };
-    // Start first turn
-    generateTurn("HOST");
+    runTurn("HOST");
   }, [settings]);
 
   const formatTime = (seconds: number) => {
@@ -73,145 +80,94 @@ const LiveRoom = () => {
     if (!settings) return "";
     if (settings.duration === "unlimited") return formatTime(timeElapsed);
     const limit = parseInt(settings.duration) * 60;
-    const remaining = Math.max(0, limit - timeElapsed);
-    return formatTime(remaining);
+    return formatTime(Math.max(0, limit - timeElapsed));
   };
 
-  const generateTurn = useCallback(
-    async (speaker: Speaker) => {
-      if (!settings || sessionEnded || isPaused) return;
-      setIsGenerating(true);
-      setCurrentSpeaker(speaker);
+  const runTurn = useCallback(async (speaker: Speaker) => {
+    if (!settings || sessionEndedRef.current) return;
 
-      try {
-        // Call edge function to generate turn
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-        if (!supabaseUrl || !supabaseKey) {
-          // Demo mode: generate placeholder text
-          await simulateTurn(speaker);
-          return;
-        }
-
-        const response = await fetch(`${supabaseUrl}/functions/v1/generate-turn`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${supabaseKey}`,
-            apikey: supabaseKey,
-          },
-          body: JSON.stringify({
-            speaker,
-            settings,
-            memory: memoryRef.current,
-            producerNote: producerNoteRef.current,
-            steerDirective: steerRef.current,
-          }),
-        });
-
-        if (!response.ok) throw new Error("Failed to generate turn");
-        const data = await response.json();
-        const turnText = data.text;
-
-        // Clear one-time directives
-        producerNoteRef.current = "";
-        steerRef.current = "";
-
-        // Add to transcript
-        const msg: TurnMessage = { speaker, text: turnText, timestamp: timeElapsed };
-        setTranscript((prev) => [...prev, msg]);
-
-        // Update memory
-        if (memoryRef.current) {
-          memoryRef.current.turnCount++;
-          memoryRef.current.coveredPoints.push(turnText.slice(0, 50));
-        }
-
-        // TTS playback
-        await playTTS(turnText, speaker === "HOST" ? settings.hostVoiceId : settings.guestVoiceId);
-
-        // Next turn
-        if (!sessionEnded && !isPaused) {
-          generateTurn(speaker === "HOST" ? "GUEST" : "HOST");
-        }
-      } catch (err) {
-        console.error("Turn generation error:", err);
-        // Fallback to simulation
-        await simulateTurn(speaker);
-      } finally {
-        setIsGenerating(false);
-      }
-    },
-    [settings, sessionEnded, isPaused, timeElapsed]
-  );
-
-  const simulateTurn = async (speaker: Speaker) => {
-    // Demo placeholder for when backend isn't connected
-    const demoTexts: Record<Speaker, string[]> = {
-      HOST: [
-        `Welcome to DuckPod! Today we're diving into "${settings?.topic}". So, what's the most exciting development you've seen recently?`,
-        "That's a fascinating perspective. Can you give us a concrete example of how that plays out in practice?",
-        "I love that example. Now, let's shift gears a bit — what do you think are the biggest challenges here?",
-        "Great point. So, looking ahead, where do you see this heading in the next few years?",
-      ],
-      GUEST: [
-        "Thanks for having me! I think the most exciting thing is how rapidly the landscape is evolving. We're seeing breakthroughs that would have seemed like science fiction just a few years ago.",
-        "Absolutely. Take for instance the way teams are now leveraging these tools in their daily workflows. It's not just about the technology — it's about how it fundamentally changes the way we think about problems.",
-        "The biggest challenge, honestly, is adoption. The tech is there, but bridging the gap between what's possible and what organizations are ready for — that's where the real work is.",
-        "I think we'll see a convergence. The tools will become more intuitive, the barriers will lower, and we'll hit a tipping point where this becomes as natural as using a search engine.",
-      ],
-    };
-
-    const texts = demoTexts[speaker];
-    const turnIndex = Math.min(
-      Math.floor((memoryRef.current?.turnCount ?? 0) / 2),
-      texts.length - 1
-    );
-    const text = texts[turnIndex];
-
-    const msg: TurnMessage = { speaker, text, timestamp: timeElapsed };
-    setTranscript((prev) => [...prev, msg]);
-
-    if (memoryRef.current) {
-      memoryRef.current.turnCount++;
+    // Wait while paused
+    while (isPausedRef.current && !sessionEndedRef.current) {
+      await new Promise((r) => setTimeout(r, 500));
     }
+    if (sessionEndedRef.current) return;
 
-    // Simulate speaking with amplitude animation
-    setIsSpeaking(true);
-    const duration = 3000 + Math.random() * 4000;
-    const startTime = Date.now();
+    setIsGenerating(true);
+    setCurrentSpeaker(speaker);
 
-    await new Promise<void>((resolve) => {
-      const animate = () => {
-        const elapsed = Date.now() - startTime;
-        if (elapsed >= duration || isPaused) {
-          setAmplitude(0);
-          setIsSpeaking(false);
-          resolve();
-          return;
-        }
-        setAmplitude(0.3 + Math.random() * 0.7);
-        requestAnimationFrame(animate);
-      };
-      animate();
-    });
-
-    // Pause between turns
-    await new Promise((r) => setTimeout(r, 800));
-
-    // Next turn
-    if (!sessionEnded && !isPaused) {
-      generateTurn(speaker === "HOST" ? "GUEST" : "HOST");
-    }
-  };
-
-  const playTTS = async (text: string, voiceId: string) => {
     try {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      if (!supabaseUrl || !supabaseKey) return;
 
+      // Update memory time remaining
+      if (memoryRef.current && settings.duration !== "unlimited") {
+        memoryRef.current.timeRemainingSeconds = parseInt(settings.duration) * 60 - timeElapsed;
+      }
+
+      // Generate turn text
+      const genResponse = await fetch(`${supabaseUrl}/functions/v1/generate-turn`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseKey}`,
+          apikey: supabaseKey,
+        },
+        body: JSON.stringify({
+          speaker,
+          settings,
+          memory: memoryRef.current,
+          producerNote: producerNoteRef.current,
+          steerDirective: steerRef.current,
+        }),
+      });
+
+      if (!genResponse.ok) {
+        const err = await genResponse.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to generate turn");
+      }
+
+      const turnData = await genResponse.json();
+      const turnText = turnData.text || turnData.content || "";
+
+      // Clear one-time directives
+      producerNoteRef.current = "";
+      steerRef.current = "";
+
+      // Add to transcript
+      const msg: TurnMessage = { speaker, text: turnText, timestamp: timeElapsed };
+      setTranscript((prev) => [...prev, msg]);
+      setIsGenerating(false);
+
+      // Update memory
+      if (memoryRef.current) {
+        memoryRef.current.turnCount++;
+        memoryRef.current.coveredPoints.push(turnText.slice(0, 80));
+      }
+
+      // Play TTS audio
+      await playTTS(turnText, speaker === "HOST" ? settings.hostVoiceId : settings.guestVoiceId);
+
+      // Next turn
+      if (!sessionEndedRef.current) {
+        await new Promise((r) => setTimeout(r, 600));
+        runTurn(speaker === "HOST" ? "GUEST" : "HOST");
+      }
+    } catch (err: any) {
+      console.error("Turn error:", err);
+      setIsGenerating(false);
+      toast({
+        title: "Error generating turn",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
+  }, [settings, timeElapsed]);
+
+  const playTTS = async (text: string, voiceId: string) => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    try {
       const response = await fetch(`${supabaseUrl}/functions/v1/tts-stream`, {
         method: "POST",
         headers: {
@@ -222,98 +178,181 @@ const LiveRoom = () => {
         body: JSON.stringify({ text, voiceId }),
       });
 
-      if (!response.ok) throw new Error("TTS failed");
+      if (!response.ok) {
+        throw new Error("TTS failed");
+      }
 
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
 
-      // Amplitude tracking
-      const audioContext = new AudioContext();
-      const source = audioContext.createMediaElementSource(audio);
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-
       setIsSpeaking(true);
 
-      const trackAmplitude = () => {
-        if (audio.paused || audio.ended) {
-          setAmplitude(0);
-          setIsSpeaking(false);
-          return;
+      // Try to set up amplitude analysis
+      try {
+        if (!audioContextRef.current || audioContextRef.current.state === "closed") {
+          audioContextRef.current = new AudioContext();
         }
-        analyser.getByteFrequencyData(dataArray);
-        const avg = dataArray.reduce((a, b) => a + b) / dataArray.length / 255;
-        setAmplitude(avg);
-        requestAnimationFrame(trackAmplitude);
-      };
+        const ctx = audioContextRef.current;
+        const source = ctx.createMediaElementSource(audio);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        analyser.connect(ctx.destination);
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-      audio.onplay = trackAmplitude;
+        const trackAmplitude = () => {
+          if (audio.paused || audio.ended) {
+            setAmplitude(0);
+            setIsSpeaking(false);
+            return;
+          }
+          analyser.getByteFrequencyData(dataArray);
+          const avg = dataArray.reduce((a, b) => a + b, 0) / dataArray.length / 255;
+          setAmplitude(avg);
+          requestAnimationFrame(trackAmplitude);
+        };
+        audio.onplay = trackAmplitude;
+      } catch {
+        // Fallback: simulate amplitude
+        const simulateAmp = () => {
+          if (audio.paused || audio.ended) {
+            setAmplitude(0);
+            setIsSpeaking(false);
+            return;
+          }
+          setAmplitude(0.3 + Math.random() * 0.5);
+          requestAnimationFrame(simulateAmp);
+        };
+        audio.onplay = simulateAmp;
+      }
+
       await audio.play();
       await new Promise<void>((resolve) => {
         audio.onended = () => {
           URL.revokeObjectURL(audioUrl);
-          audioContext.close();
+          setIsSpeaking(false);
+          setAmplitude(0);
           resolve();
         };
       });
     } catch (err) {
-      console.error("TTS playback error:", err);
+      console.error("TTS error:", err);
+      // Fallback: simulate speaking
+      setIsSpeaking(true);
+      const duration = 2000 + text.length * 40;
+      const start = Date.now();
+      await new Promise<void>((resolve) => {
+        const animate = () => {
+          const elapsed = Date.now() - start;
+          if (elapsed >= duration) {
+            setAmplitude(0);
+            setIsSpeaking(false);
+            resolve();
+            return;
+          }
+          setAmplitude(0.2 + Math.random() * 0.6);
+          requestAnimationFrame(animate);
+        };
+        animate();
+      });
     }
   };
 
-  const handleEndSession = () => {
-    setSessionEnded(true);
+  const handleEndSession = async () => {
+    sessionEndedRef.current = true;
     setIsSpeaking(false);
+    setAmplitude(0);
     clearInterval(timerRef.current);
-    navigate("/session-end", {
-      state: {
-        settings,
-        transcript,
-        duration: timeElapsed,
-      },
-    });
+
+    const currentTranscript = transcriptRef.current;
+
+    // Try to generate show notes and save episode
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      // Generate show notes
+      const notesResp = await fetch(`${supabaseUrl}/functions/v1/generate-show-notes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseKey}`,
+          apikey: supabaseKey,
+        },
+        body: JSON.stringify({ transcript: currentTranscript }),
+      });
+
+      let showNotes = null;
+      if (notesResp.ok) {
+        showNotes = await notesResp.json();
+      }
+
+      // Save episode
+      await fetch(`${supabaseUrl}/functions/v1/upload-episode`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${supabaseKey}`,
+          apikey: supabaseKey,
+        },
+        body: JSON.stringify({
+          topic: settings!.topic,
+          duration: timeElapsed,
+          transcript: currentTranscript,
+          showNotes,
+          settings,
+        }),
+      });
+
+      navigate("/session-end", {
+        state: {
+          settings,
+          transcript: currentTranscript,
+          duration: timeElapsed,
+          showNotes,
+        },
+      });
+    } catch (err) {
+      console.error("End session error:", err);
+      navigate("/session-end", {
+        state: {
+          settings,
+          transcript: currentTranscript,
+          duration: timeElapsed,
+        },
+      });
+    }
   };
 
   if (!settings) return null;
 
   const bgPreset = BACKGROUND_PRESETS.find((b) => b.id === settings.background);
-  const bgStyle = bgPreset ? bgPreset.gradient : settings.background;
+  const bgStyle = bgPreset ? bgPreset.gradient : undefined;
 
   return (
     <div className="flex h-screen flex-col" style={{ background: bgStyle }}>
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-border/30 bg-background/60 px-6 py-3 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold text-foreground">{settings.topic}</h2>
+          <h2 className="max-w-md truncate text-sm font-semibold text-foreground">{settings.topic}</h2>
           {isGenerating && (
-            <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] text-primary animate-pulse">
+            <span className="animate-pulse rounded-full bg-primary/20 px-2 py-0.5 text-[10px] text-primary">
               Generating…
             </span>
           )}
         </div>
         <div className="flex items-center gap-4">
-          <span className="font-mono text-lg font-bold text-foreground">
-            {getDurationDisplay()}
-          </span>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleEndSession}
-            className="gap-1.5"
-          >
+          <span className="font-mono text-lg font-bold text-foreground">{getDurationDisplay()}</span>
+          <Button variant="destructive" size="sm" onClick={handleEndSession} className="gap-1.5">
             <Square className="h-3 w-3" />
             End Session
           </Button>
         </div>
       </div>
 
-      {/* Main content */}
+      {/* Main */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Stage */}
         <div className="flex flex-1 flex-col">
           {/* Avatars */}
           <div className="flex flex-1 items-center justify-center gap-8 px-8">
@@ -336,23 +375,13 @@ const LiveRoom = () => {
             <LiveControls
               isPaused={isPaused}
               onTogglePause={() => setIsPaused(!isPaused)}
-              onNextQuestion={() => {
-                steerRef.current = "Move to next question immediately";
-                // Will be picked up on next turn
-              }}
-              onInterrupt={() => {
-                steerRef.current = "Host interrupts with a follow-up question";
-              }}
-              onSteer={(directive) => {
-                steerRef.current = directive;
-              }}
-              onProducerNote={(note) => {
-                producerNoteRef.current = note;
-              }}
+              onNextQuestion={() => { steerRef.current = "Move to next question immediately"; }}
+              onInterrupt={() => { steerRef.current = "Host interrupts with a probing follow-up"; }}
+              onSteer={(d) => { steerRef.current = d; }}
+              onProducerNote={(n) => { producerNoteRef.current = n; }}
             />
           </div>
 
-          {/* Disclaimer */}
           <div className="flex items-center justify-center gap-1.5 pb-3">
             <AlertTriangle className="h-3 w-3 text-muted-foreground" />
             <p className="text-[10px] text-muted-foreground">
@@ -361,7 +390,7 @@ const LiveRoom = () => {
           </div>
         </div>
 
-        {/* Transcript panel */}
+        {/* Transcript */}
         <div className="w-80 border-l border-border/30 bg-background/60 backdrop-blur-md">
           <TranscriptPanel messages={transcript} className="h-full" />
         </div>

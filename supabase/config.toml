@@ -1,1 +1,13 @@
 project_id = "zxymfkpeevjtzczbhrwm"
+
+[functions.generate-turn]
+verify_jwt = false
+
+[functions.tts-stream]
+verify_jwt = false
+
+[functions.generate-show-notes]
+verify_jwt = false
+
+[functions.upload-episode]
+verify_jwt = false
