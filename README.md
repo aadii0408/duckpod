@@ -1,6 +1,7 @@
-# 🦆 DuckPod
+# DuckPod 🚀
 
 **Human-first AI Podcast Studio**  
+##  Tracks: **MLH Best Use of ElevenLabs · Anti-AI**
 AI can speak. Humans decide if it deserves trust.
 
 Live App: https://duckpod.lovable.app
