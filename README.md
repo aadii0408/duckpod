@@ -21,8 +21,7 @@ AI hosts the show —
 Humans deliver the final verdict.
 
 This isn’t AI judging itself.  
-This is **Human-as-Judge**. :contentReference[oaicite:0]{index=0}
-
+This is **Human-as-Judge**.
 ---
 
 ## 🎯 Core Concept
@@ -40,7 +39,7 @@ DuckPod enforces:
 - Hallucination detection
 - Trust score generation
 
-Trust is **earned**, not assumed. :contentReference[oaicite:1]{index=1}
+Trust is **earned**, not assumed.
 
 ---
 
@@ -52,13 +51,13 @@ Trust is **earned**, not assumed. :contentReference[oaicite:1]{index=1}
    - Structured transcript output  
 
 2️⃣ **Human Evaluation Layer**  
-   After listening or reading the generated podcast, users score it across five trust dimensions: Grounding, Consistency, Transparency, Manipulation Resistance, and Usefulness. :contentReference[oaicite:2]{index=2}
+   After listening or reading the generated podcast, users score it across five trust dimensions: Grounding, Consistency, Transparency, Manipulation Resistance, and Usefulness.
 
 3️⃣ **Trust Score Calculation (0–100)**  
    Uses a weighted formula to generate a final score highlighting reliability.
 
 4️⃣ **Hallucination Detection**  
-   If unsupported claims are identified, or core metrics are low, DuckPod flags potential hallucination. :contentReference[oaicite:3]{index=3}
+   If unsupported claims are identified, or core metrics are low, DuckPod flags potential hallucination.
 
 ---
 
@@ -92,7 +91,7 @@ This scoring not only evaluates AI content, it teaches critical thinking. :conte
 ### 🛡 Reliability Output
 - Trust Score
 - Hallucination flag
-- Human verdict dashboard :contentReference[oaicite:5]{index=5}
+- Human verdict dashboard 
 
 ---
 
@@ -107,18 +106,18 @@ This scoring not only evaluates AI content, it teaches critical thinking. :conte
 – Structured extraction and scoring pass
 
 **Database**  
-– Supabase for session & trust data persistence :contentReference[oaicite:6]{index=6}
+– Supabase for session & trust data persistence 
 
 ---
 
 ## 🎯 Why DuckPod Exists
 
-AI systems are powerful —  
+AI systems are powerful,
 but they are not inherently trustworthy.
 
 DuckPod keeps humans in control of the narrative and the final verdict.  
 AI can **host the show**.  
-Humans decide if it **tells the truth**. :contentReference[oaicite:7]{index=7}
+Humans decide if it **tells the truth**.
 
 ---
 
@@ -129,36 +128,18 @@ Upcoming capabilities:
 - Adversarial questioning
 - Multi-model comparisons
 - Confidence gap analytics
-- Shareable trust cards :contentReference[oaicite:8]{index=8}
+- Shareable trust cards 
 
 ---
 
 ## 📦 Tech Stack
 
 - TypeScript
+- Python
+- Elevevan Labs
 - Tailwind CSS
 - Supabase
 - Gemini API
-- Lovable UI :contentReference[oaicite:9]{index=9}
+- Mistral API 
+- Lovable UI 
 
----
-
-## 📜 License
-
-DuckPod is released under the **MIT License**. :contentReference[oaicite:10]{index=10}
-
----
-
-## 🧑‍💻 Contributing
-
-1. Fork the repo  
-2. Create a feature branch  
-3. Submit a pull request
-
-Help DuckPod become the gold standard in human-centered AI evaluation.
-
----
-
-## 📌 Acknowledgements
-
-Built by Aaditya Champaneri. :contentReference[oaicite:11]{index=11}
