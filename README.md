@@ -6,8 +6,8 @@ AI can speak. Humans decide if it deserves trust.
 Live App: https://duckpod.lovable.app
 ## 👥 Core Team
 
-| Name | Role | GitHub |
-|------|------|--------|
+| Name | GitHub |
+|------| --------|
 | Aaditya Champaneri | [@aadii0408](https://github.com/aadii0408) |
 | Rushi Lunagariya | [@Rushi7667](https://github.com/Rushi7667) |
 | Charmil Patel | [@Charmil-13](https://github.com/Charmil-13) |
