@@ -4,7 +4,7 @@ import { Mic, Library, Headphones, Radio, MessageSquare, Sparkles, Share2 } from
 import { Button } from "@/components/ui/button";
 import WaveformAnimation from "@/components/WaveformAnimation";
 import AvatarSVG from "@/components/AvatarSVG";
-import { AVATARS } from "@/lib/constants";
+import { RAJ_HOST, AVATARS } from "@/lib/constants";
 
 const MOCK_CONVERSATION = [
   { speaker: "HOST", text: "So what excites you most about autonomous AI agents?" },
@@ -14,12 +14,11 @@ const MOCK_CONVERSATION = [
 
 const STEPS = [
   { icon: Sparkles, title: "Pick a topic", desc: "Enter any subject — AI picks the rest" },
-  { icon: MessageSquare, title: "Watch the conversation", desc: "Two AI speakers debate live with real voices" },
+  { icon: MessageSquare, title: "Watch the conversation", desc: "Raj hosts a live AI debate with real voices" },
   { icon: Share2, title: "Save & share", desc: "Get show notes, transcript, and a shareable card" },
 ];
 
-const hostAvatar = AVATARS[0];
-const guestAvatar = AVATARS[7]; // different style
+const guestAvatar = AVATARS[7];
 
 const Landing = () => {
   return (
@@ -47,7 +46,7 @@ const Landing = () => {
         </div>
 
         <p className="max-w-md text-lg text-muted-foreground">
-          AI-generated live podcasts on any topic. Two AI speakers, one studio, infinite conversations.
+          AI-generated live podcasts on any topic. Hosted by <span className="font-semibold text-foreground">Raj</span>, with AI guests debating in real time.
         </p>
 
         <WaveformAnimation barCount={9} className="h-8" />
@@ -86,18 +85,18 @@ const Landing = () => {
         </div>
       </motion.div>
 
-      {/* Your Host section */}
+      {/* Your Host: Raj */}
       <motion.div
         className="relative z-10 mt-16 flex items-center gap-5 rounded-2xl border border-border bg-card/40 px-6 py-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        <AvatarSVG variant={0} size={72} colors={hostAvatar.colors} isSpeaking={false} mouthScale={0} />
+        <AvatarSVG variant={RAJ_HOST.avatarVariant} size={72} colors={RAJ_HOST.colors} isSpeaking={false} mouthScale={0} />
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Your Host</p>
-          <p className="text-base font-medium text-foreground">{hostAvatar.label}</p>
-          <p className="text-sm text-muted-foreground">Sharp, witty, and always curious</p>
+          <p className="text-base font-medium text-foreground">{RAJ_HOST.name}</p>
+          <p className="text-sm text-muted-foreground">{RAJ_HOST.tagline}</p>
         </div>
       </motion.div>
 
@@ -138,8 +137,8 @@ const Landing = () => {
         <div className="rounded-xl border border-border bg-card/40 p-6">
           <div className="mb-4 flex items-center justify-center gap-6">
             <div className="flex flex-col items-center gap-1">
-              <AvatarSVG variant={0} size={56} colors={hostAvatar.colors} />
-              <span className="text-[10px] font-semibold uppercase text-muted-foreground">Host</span>
+              <AvatarSVG variant={RAJ_HOST.avatarVariant} size={56} colors={RAJ_HOST.colors} />
+              <span className="text-[10px] font-semibold uppercase text-muted-foreground">{RAJ_HOST.name}</span>
             </div>
             <div className="flex flex-col items-center gap-1">
               <AvatarSVG variant={1} size={56} colors={guestAvatar.colors} />
