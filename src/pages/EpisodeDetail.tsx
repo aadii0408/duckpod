@@ -27,7 +27,7 @@ const EpisodeDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
@@ -35,8 +35,9 @@ const EpisodeDetail = () => {
 
   if (!episode) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
         <p className="text-muted-foreground">Episode not found.</p>
+        <Button variant="outline" asChild><Link to="/episodes">Back to Episodes</Link></Button>
       </div>
     );
   }
@@ -45,28 +46,32 @@ const EpisodeDetail = () => {
   const transcript = (episode.transcript || []) as TurnMessage[];
 
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="section-padding py-6 sm:py-10">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-8 flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+        {/* Header */}
+        <div className="mb-6 flex items-start gap-3">
+          <Button variant="ghost" size="icon" asChild className="mt-1 shrink-0">
             <Link to="/episodes"><ArrowLeft className="h-4 w-4" /></Link>
           </Button>
-          <h1 className="text-2xl font-bold">{showNotes?.title || episode.topic}</h1>
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold sm:text-2xl">{showNotes?.title || episode.topic}</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{Math.floor(episode.duration / 60)} min</span>
+              <span className="flex items-center gap-1"><Hash className="h-3.5 w-3.5" />{transcript.length} turns</span>
+              <span>{new Date(episode.created_at).toLocaleDateString()}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="flex gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1"><Clock className="h-4 w-4" />{Math.floor(episode.duration / 60)} min</span>
-            <span>{new Date(episode.created_at).toLocaleDateString()}</span>
-          </div>
-
+        <div className="flex flex-col gap-5">
           {showNotes && (
-            <div className="space-y-4 rounded-xl border border-border bg-card/40 p-6">
-              {showNotes.summary && <p className="text-sm text-foreground/85">{showNotes.summary}</p>}
+            <div className="space-y-4 rounded-xl glass p-5">
+              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">Show Notes</h3>
+              {showNotes.summary && <p className="text-sm leading-relaxed text-foreground/85">{showNotes.summary}</p>}
               {showNotes.takeaways?.length ? (
                 <div>
                   <h4 className="mb-2 text-xs font-semibold text-muted-foreground">Key Takeaways</h4>
-                  <ul className="space-y-1">
+                  <ul className="space-y-1.5">
                     {showNotes.takeaways.map((t, i) => (
                       <li key={i} className="flex gap-2 text-sm"><span className="text-primary">•</span>{t}</li>
                     ))}
@@ -76,14 +81,14 @@ const EpisodeDetail = () => {
               {showNotes.hashtags?.length ? (
                 <div className="flex flex-wrap gap-2">
                   {showNotes.hashtags.map((h, i) => (
-                    <span key={i} className="rounded-full bg-secondary/50 px-2 py-0.5 text-xs text-secondary-foreground">{h}</span>
+                    <span key={i} className="rounded-full bg-secondary/50 px-2.5 py-0.5 text-xs text-secondary-foreground">{h}</span>
                   ))}
                 </div>
               ) : null}
             </div>
           )}
 
-          <div className="rounded-xl border border-border bg-card/40">
+          <div className="overflow-hidden rounded-xl border border-border/50 bg-card/30">
             <TranscriptPanel messages={transcript} className="max-h-[500px]" />
           </div>
         </div>

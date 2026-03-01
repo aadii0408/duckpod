@@ -22,10 +22,10 @@ function ScoreGauge({ score }: { score: number }) {
 
   return (
     <div className="relative flex items-center justify-center">
-      <svg width="140" height="140" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r="54" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
+      <svg width="130" height="130" viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="54" fill="none" stroke="hsl(var(--muted))" strokeWidth="7" />
         <circle
-          cx="60" cy="60" r="54" fill="none" stroke={color} strokeWidth="8"
+          cx="60" cy="60" r="54" fill="none" stroke={color} strokeWidth="7"
           strokeDasharray={circumference} strokeDashoffset={circumference - filled}
           strokeLinecap="round" transform="rotate(-90 60 60)"
           className="transition-all duration-500"
@@ -61,12 +61,12 @@ export default function TrustScoreRubric() {
     [values.grounding, values.transparency, unsupportedClaim],
   );
 
-  const scoreColor = trustScore > 70 ? "text-green-500" : trustScore >= 40 ? "text-yellow-500" : "text-red-500";
+  const scoreColor = trustScore > 70 ? "text-green-400" : trustScore >= 40 ? "text-yellow-400" : "text-red-400";
 
   if (submitted) {
     return (
       <motion.div
-        className="w-full space-y-5 rounded-2xl border-2 border-primary/30 bg-card/60 p-6 backdrop-blur-sm"
+        className="w-full space-y-5 rounded-2xl glass border-primary/20 p-5 sm:p-6"
         initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
       >
         <h3 className="text-center text-lg font-bold text-foreground">🛡️ Trust Score Result</h3>
@@ -90,7 +90,7 @@ export default function TrustScoreRubric() {
 
   return (
     <motion.div
-      className="w-full space-y-5 rounded-2xl border-2 border-primary/30 bg-card/60 p-6 backdrop-blur-sm"
+      className="w-full space-y-5 rounded-2xl glass border-primary/20 p-5 sm:p-6"
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
     >
       <div className="space-y-1 text-center">
@@ -98,9 +98,9 @@ export default function TrustScoreRubric() {
         <p className="text-xs text-muted-foreground">Rate the AI's performance on each dimension (0–10)</p>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-4">
         {RUBRIC_ITEMS.map((item) => (
-          <div key={item.key} className="space-y-2">
+          <div key={item.key} className="space-y-1.5">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">{item.label} <span className="text-muted-foreground font-normal">({(item.weight * 100).toFixed(0)}%)</span></Label>
               <span className="text-sm font-bold tabular-nums">{values[item.key]}</span>
@@ -120,7 +120,7 @@ export default function TrustScoreRubric() {
         <Label htmlFor="unsupported" className="text-sm cursor-pointer">I spotted an unsupported claim</Label>
       </div>
 
-      <div className="flex items-center justify-between rounded-xl bg-secondary/40 px-4 py-3">
+      <div className="flex items-center justify-between rounded-xl bg-secondary/30 px-4 py-3">
         <span className="text-sm text-muted-foreground">Live Trust Score</span>
         <span className={`text-2xl font-black tabular-nums ${scoreColor}`}>{trustScore}</span>
       </div>

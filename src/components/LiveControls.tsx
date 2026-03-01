@@ -31,7 +31,7 @@ const LiveControls = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card/60 p-4 backdrop-blur-sm">
+    <div className="flex flex-col gap-2.5 rounded-xl glass p-3 sm:p-4">
       {/* Main controls */}
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -45,11 +45,13 @@ const LiveControls = ({
         </Button>
         <Button variant="outline" size="sm" onClick={onNextQuestion} className="gap-1.5">
           <SkipForward className="h-3.5 w-3.5" />
-          Next Question
+          <span className="hidden sm:inline">Next Question</span>
+          <span className="sm:hidden">Next</span>
         </Button>
         <Button variant="outline" size="sm" onClick={onInterrupt} className="gap-1.5">
           <MessageSquare className="h-3.5 w-3.5" />
-          Interrupt
+          <span className="hidden sm:inline">Interrupt</span>
+          <span className="sm:hidden">Cut In</span>
         </Button>
       </div>
 
@@ -59,7 +61,7 @@ const LiveControls = ({
           <button
             key={chip}
             onClick={() => onSteer(chip)}
-            className="rounded-full border border-border bg-secondary/50 px-3 py-1 text-xs text-secondary-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+            className="rounded-full border border-border/50 bg-secondary/30 px-2.5 py-1 text-[11px] text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             {chip}
           </button>
@@ -69,7 +71,7 @@ const LiveControls = ({
       {/* Producer note */}
       <div className="flex gap-2">
         <Input
-          placeholder="Producer note — guidance for next turn..."
+          placeholder="Producer note…"
           value={note}
           onChange={(e) => setNote(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendNote()}
